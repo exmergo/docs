@@ -1,0 +1,102 @@
+{
+  "product": "Dex",
+  "description": "Agent-native analytics engineering",
+  "tabs": [
+    {
+      "tab": "Documentation",
+      "groups": [
+        {
+          "group": "Get started",
+          "pages": [
+            "dex/index"
+          ]
+        },
+        {
+          "group": "Guardrails",
+          "pages": [
+            "dex/guardrails/cost-controls",
+            "dex/guardrails/pii-policy"
+          ]
+        },
+        {
+          "group": "Concepts",
+          "pages": [
+            "dex/concepts/source-of-truth",
+            "dex/concepts/methodology",
+            "dex/concepts/dbt-project"
+          ]
+        },
+        {
+          "group": "Connectors",
+          "pages": [
+            "dex/connectors/duckdb",
+            "dex/connectors/bigquery",
+            "dex/connectors/snowflake",
+            "dex/connectors/databricks",
+            "dex/connectors/redshift",
+            "dex/connectors/postgres",
+            "dex/connectors/clickhouse"
+          ]
+        },
+        {
+          "group": "Semantic layers",
+          "pages": [
+            "dex/semantic-layers/overview",
+            "dex/semantic-layers/ossie"
+          ]
+        },
+        {
+          "group": "Guides",
+          "pages": [
+            "dex/guides/ossie-semantic-layer"
+          ]
+        }
+      ]
+    },
+    {
+      "tab": "Reference",
+      "groups": [
+        {
+          "group": "CLI",
+          "pages": [
+            "dex/cli/overview",
+            "dex/cli/connect",
+            "dex/cli/explore",
+            "dex/cli/transform",
+            "dex/cli/semantic",
+            "dex/cli/maintain",
+            "dex/cli/config",
+            "dex/cli/viz",
+            "dex/cli/demo"
+          ]
+        },
+        {
+          "group": "Using dex",
+          "pages": [
+            "dex/reference/command-contract"
+          ]
+        },
+        {
+          "group": "Extending dex",
+          "pages": [
+            "dex/reference/project-formats",
+            "dex/reference/storage-backends",
+            "dex/reference/host-integration"
+          ]
+        },
+        {
+          "group": "Project",
+          "pages": [
+            "dex/reference/evaluation"
+          ]
+        }
+      ]
+    },
+    {
+      "tab": "Changelog",
+      "pages": [
+        "dex/changelog"
+      ]
+    }
+  ]
+}

@@ -1,55 +1,54 @@
-# Mintlify Starter Kit
+# Exmergo documentation
 
-Use the starter kit to get your docs deployed and ready to customize.
+The source of https://docs.exmergo.com. Mintlify deploys this repository's
+`main` branch.
 
-Click the green **Use this template** button at the top of this repo to copy the Mintlify starter kit. The starter kit contains examples with
+## Layout
 
-- Guide pages
-- Navigation
-- Customizations
-- API reference pages
-- Use of popular components
+| Path | Owner | What it is |
+| --- | --- | --- |
+| `docs.json` | this repository | Site settings: name, colours, navbar, footer, search, analytics, and the product switcher. |
+| `index.mdx` | this repository | The Exmergo home page. |
+| `skill.md` | this repository | Tells an agent that finds the site where each product's real skills come from. |
+| `dex/` | [exmergo/dex](https://github.com/exmergo/dex) | The Dex section, served at `/dex`. Generated; never edit it here. |
 
-**[Follow the full quickstart guide](https://starter.mintlify.com/quickstart)**
+Each product owns one folder and publishes it from its own repository: the
+release workflow there builds the section and commits it here, replacing that
+folder and nothing else. A product's menu and redirects ship inside its folder
+(`dex/navigation.json`, `dex/redirects.json`), and `docs.json` reads them with
+`$ref`, so a product release never edits this repository's own files.
 
-## AI-assisted writing
+To change a Dex page, change its source in exmergo/dex: `docs/`, `references/`,
+`CHANGELOG.md` or the CLI help text. The next Dex release publishes it.
 
-Set up your AI coding tool to work with Mintlify:
+## Adding a product
 
-```bash
-npx skills add https://mintlify.com/docs
+1. The product's repository builds its pages into a folder named after it
+   (`viz/`), with `navigation.json` holding its product entry and
+   `redirects.json` its redirects, all inside that folder.
+2. Its release workflow commits that folder here, the way exmergo/dex does.
+3. Add `{ "$ref": "./viz/navigation.json" }` to `navigation.products` in
+   `docs.json`. Redirects take one `$ref`; with a second product, merge the
+   lists in a small step here rather than giving one product the whole key.
+
+## Checks
+
+Every pull request and every push to `main` runs Mintlify's `validate`,
+`broken-links --check-anchors --check-redirects` and `a11y` over the whole site
+(`.github/workflows/validate.yml`). A pull request that edits a product's folder
+fails unless it carries the `product-sync` label, because those folders are
+written by their product's release, not by hand.
+
+## Previewing
+
+```
+npx --yes mint@4.2.994 dev
 ```
 
-This command installs Mintlify's documentation skill for your configured AI tools like Claude Code, Cursor, Windsurf, and others. The skill includes component reference, writing standards, and workflow guidance.
-
-See the [AI tools guides](/ai-tools) for tool-specific setup.
-
-## Development
-
-Install the [Mintlify CLI](https://www.npmjs.com/package/mint) to preview your documentation changes locally. To install, use the following command:
+Then open http://localhost:3000. To preview unreleased Dex changes, build the
+site from an exmergo/dex checkout instead:
 
 ```
-npm i -g mint
+uv run --project packages/dex-core python scripts/build_docs_site.py --site ../docs
+cd build/docs-site && npx --yes mint@4.2.994 dev
 ```
-
-Run the following command at the root of your documentation, where your `docs.json` is located:
-
-```
-mint dev
-```
-
-View your local preview at `http://localhost:3000`.
-
-## Publishing changes
-
-Install our GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app) to propagate changes from your repo to your deployment. Changes are deployed to production automatically after pushing to the default branch.
-
-## Need help?
-
-### Troubleshooting
-
-- If your dev environment isn't running: Run `mint update` to ensure you have the most recent version of the CLI.
-- If a page loads as a 404: Make sure you are running in a folder with a valid `docs.json`.
-
-### Resources
-- [Mintlify documentation](https://mintlify.com/docs)

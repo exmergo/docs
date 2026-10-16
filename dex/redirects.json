@@ -1,0 +1,170 @@
+[
+  {
+    "source": "/dex/cli",
+    "destination": "/dex/cli/overview"
+  },
+  {
+    "source": "/dex/reference",
+    "destination": "/dex/reference/command-contract"
+  },
+  {
+    "source": "/dex/references/duckdb",
+    "destination": "/dex/connectors/duckdb"
+  },
+  {
+    "source": "/dex/references/duckdb.md",
+    "destination": "/dex/connectors/duckdb"
+  },
+  {
+    "source": "/dex/references/bigquery",
+    "destination": "/dex/connectors/bigquery"
+  },
+  {
+    "source": "/dex/references/bigquery.md",
+    "destination": "/dex/connectors/bigquery"
+  },
+  {
+    "source": "/dex/references/snowflake",
+    "destination": "/dex/connectors/snowflake"
+  },
+  {
+    "source": "/dex/references/snowflake.md",
+    "destination": "/dex/connectors/snowflake"
+  },
+  {
+    "source": "/dex/references/databricks",
+    "destination": "/dex/connectors/databricks"
+  },
+  {
+    "source": "/dex/references/databricks.md",
+    "destination": "/dex/connectors/databricks"
+  },
+  {
+    "source": "/dex/references/redshift",
+    "destination": "/dex/connectors/redshift"
+  },
+  {
+    "source": "/dex/references/redshift.md",
+    "destination": "/dex/connectors/redshift"
+  },
+  {
+    "source": "/dex/references/postgres",
+    "destination": "/dex/connectors/postgres"
+  },
+  {
+    "source": "/dex/references/postgres.md",
+    "destination": "/dex/connectors/postgres"
+  },
+  {
+    "source": "/dex/references/clickhouse",
+    "destination": "/dex/connectors/clickhouse"
+  },
+  {
+    "source": "/dex/references/clickhouse.md",
+    "destination": "/dex/connectors/clickhouse"
+  },
+  {
+    "source": "/dex/references/semantic-layer",
+    "destination": "/dex/semantic-layers/overview"
+  },
+  {
+    "source": "/dex/references/semantic-layer.md",
+    "destination": "/dex/semantic-layers/overview"
+  },
+  {
+    "source": "/dex/references/ossie-compatibility",
+    "destination": "/dex/semantic-layers/ossie"
+  },
+  {
+    "source": "/dex/references/ossie-compatibility.md",
+    "destination": "/dex/semantic-layers/ossie"
+  },
+  {
+    "source": "/dex/references/ossie-walkthrough",
+    "destination": "/dex/guides/ossie-semantic-layer"
+  },
+  {
+    "source": "/dex/references/ossie-walkthrough.md",
+    "destination": "/dex/guides/ossie-semantic-layer"
+  },
+  {
+    "source": "/dex/references/cost-controls",
+    "destination": "/dex/guardrails/cost-controls"
+  },
+  {
+    "source": "/dex/references/cost-controls.md",
+    "destination": "/dex/guardrails/cost-controls"
+  },
+  {
+    "source": "/dex/references/pii-policy",
+    "destination": "/dex/guardrails/pii-policy"
+  },
+  {
+    "source": "/dex/references/pii-policy.md",
+    "destination": "/dex/guardrails/pii-policy"
+  },
+  {
+    "source": "/dex/references/canonical-model",
+    "destination": "/dex/concepts/source-of-truth"
+  },
+  {
+    "source": "/dex/references/canonical-model.md",
+    "destination": "/dex/concepts/source-of-truth"
+  },
+  {
+    "source": "/dex/references/methodology",
+    "destination": "/dex/concepts/methodology"
+  },
+  {
+    "source": "/dex/references/methodology.md",
+    "destination": "/dex/concepts/methodology"
+  },
+  {
+    "source": "/dex/references/dbt-project",
+    "destination": "/dex/concepts/dbt-project"
+  },
+  {
+    "source": "/dex/references/dbt-project.md",
+    "destination": "/dex/concepts/dbt-project"
+  },
+  {
+    "source": "/dex/references/command-contract",
+    "destination": "/dex/reference/command-contract"
+  },
+  {
+    "source": "/dex/references/command-contract.md",
+    "destination": "/dex/reference/command-contract"
+  },
+  {
+    "source": "/dex/references/project",
+    "destination": "/dex/reference/project-formats"
+  },
+  {
+    "source": "/dex/references/project.md",
+    "destination": "/dex/reference/project-formats"
+  },
+  {
+    "source": "/dex/references/storage",
+    "destination": "/dex/reference/storage-backends"
+  },
+  {
+    "source": "/dex/references/storage.md",
+    "destination": "/dex/reference/storage-backends"
+  },
+  {
+    "source": "/dex/references/host-integration",
+    "destination": "/dex/reference/host-integration"
+  },
+  {
+    "source": "/dex/references/host-integration.md",
+    "destination": "/dex/reference/host-integration"
+  },
+  {
+    "source": "/dex/references/evaluation",
+    "destination": "/dex/reference/evaluation"
+  },
+  {
+    "source": "/dex/references/evaluation.md",
+    "destination": "/dex/reference/evaluation"
+  }
+]

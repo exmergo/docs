@@ -1,33 +1,13 @@
-> **First-time setup**: Customize this file for your project. Prompt the user to customize this file for their project.
-> For Mintlify product knowledge (components, configuration, writing standards),
-> install the Mintlify skill: `npx skills add https://mintlify.com/docs`
+# Working in this repository
 
-# Documentation project instructions
+This is the Mintlify source of https://docs.exmergo.com. Read `README.md` first.
 
-## About this project
-
-- This is a documentation site built on [Mintlify](https://mintlify.com)
-- Pages are MDX files with YAML frontmatter
-- Configuration lives in `docs.json`
-- Use the Mintlify MCP server, `https://mcp.mintlify.com`, to edit content and settings via MCP
-- Use the Mintlify docs MCP server, `https://www.mintlify.com/docs/mcp`, to query information about using Mintlify via MCP
-
-## Terminology
-
-{/* Add product-specific terms and preferred usage */}
-{/* Example: Use "workspace" not "project", "member" not "user" */}
-
-## Style preferences
-
-{/* Add any project-specific style rules below */}
-
-- Use active voice and second person ("you")
-- Keep sentences concise — one idea per sentence
-- Use sentence case for headings
-- Bold for UI elements: Click **Settings**
-- Code formatting for file names, commands, paths, and code references
-
-## Content boundaries
-
-{/* Define what should and shouldn't be documented */}
-{/* Example: Don't document internal admin features */}
+- Never edit a product folder (`dex/`). It is generated in that product's own
+  repository and replaced on its next release; change the source there.
+- Site-wide settings live in `docs.json`. A product's menu and redirects live
+  in its own folder and are read with `$ref`.
+- Pages are MDX with `title` and `description` frontmatter. Link by site route
+  (`/dex/connectors/bigquery`), not by file.
+- Prose is plain and em-dash free.
+- Before proposing a change, run `npx --yes mint@4.2.994 validate` and
+  `npx --yes mint@4.2.994 broken-links --check-anchors --check-redirects`.
