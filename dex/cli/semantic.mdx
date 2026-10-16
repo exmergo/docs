@@ -96,6 +96,27 @@ dex semantic ossie [--edits-file FILE] [{define,update,plan}] [<intent>]
 | --- | --- | --- |
 | `--edits-file FILE` | whole-document edits payload as JSON; '-' reads stdin |  |
 
+## dex semantic slayer
+
+Validate whole SLayer model files at the paths semantic.slayer.models configures, with SLayer's own model, then store a plan. Needs the [slayer] extra. Repo-only.
+
+```text
+dex semantic slayer [--edits-file FILE] [{define,update,plan}] [<intent>]
+```
+
+**Arguments**
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `[{define,update,plan}]` | define new documents, update existing ones, or plan a mix |  |
+| `[<intent>]` | one line saying what the change is for |  |
+
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--edits-file FILE` | whole-document edits payload as JSON; '-' reads stdin |  |
+
 Every command here also accepts the [global options](/dex/cli/overview#global-options).
 
 Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/main/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.
