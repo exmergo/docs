@@ -1,72 +1,82 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Mintlify Starter Kit",
+  "name": "Exmergo",
+  "description": "Documentation for Exmergo, the AI stack for your data stack, and for its products, starting with Dex, the agent-native analytics engineering toolkit.",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#2563eb",
+    "light": "#60a5fa",
+    "dark": "#2563eb"
   },
-  "favicon": "/favicon.svg",
+  "fonts": {
+    "family": "Geist"
+  },
+  "appearance": {
+    "default": "system"
+  },
   "navigation": {
-    "pages": [
+    "products": [
       {
-        "group": "Getting Started",
-        "pages": [
-          "index",
-          "quickstart"
-        ]
+        "product": "Exmergo",
+        "description": "The AI stack for your data stack",
+        "pages": ["index"]
+      },
+      {
+        "$ref": "./dex/navigation.json"
       }
-    ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
-        }
-      ]
-    }
-  },
-  "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
+    ]
   },
   "navbar": {
     "links": [
       {
-        "label": "Support",
-        "href": "mailto:support@mintlify.com"
+        "label": "Discord",
+        "href": "https://www.exmergo.com/discord?ref=docs"
+      },
+      {
+        "label": "Dex Enterprise",
+        "href": "https://www.exmergo.com/dex/enterprise"
       }
     ],
     "primary": {
-      "type": "button",
-      "label": "Dashboard",
-      "href": "https://app.mintlify.com"
+      "type": "github",
+      "href": "https://github.com/exmergo"
     }
-  },
-  "contextual": {
-    "options": [
-      "copy",
-      "view",
-      "chatgpt",
-      "claude",
-      "perplexity",
-      "mcp",
-      "cursor",
-      "vscode"
-    ]
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
+      "github": "https://github.com/exmergo",
+      "x": "https://x.com/exmergo",
+      "linkedin": "https://www.linkedin.com/company/exmergo/",
+      "discord": "https://www.exmergo.com/discord?ref=docs",
+      "website": "https://www.exmergo.com"
+    }
+  },
+  "seo": {
+    "indexing": "navigable",
+    "metatags": {
+      "og:site_name": "Exmergo",
+      "twitter:site": "@exmergo"
+    }
+  },
+  "contextual": {
+    "options": ["copy", "view", "claude", "chatgpt", "perplexity", "mcp", "add-mcp", "cursor", "vscode"]
+  },
+  "integrations": {
+    "ga4": {
+      "measurementId": "G-D0VN4G61JD"
+    }
+  },
+  "search": {
+    "prompt": "Search the Exmergo docs"
+  },
+  "redirects": {
+    "$ref": "./dex/redirects.json"
+  },
+  "errors": {
+    "404": {
+      "redirect": false,
+      "title": "Page not found",
+      "description": "Search the docs, or start from the [home page](/)."
     }
   }
 }
