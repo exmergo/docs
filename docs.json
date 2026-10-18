@@ -54,6 +54,7 @@
   "seo": {
     "indexing": "navigable",
     "metatags": {
+      "canonical": "https://docs.exmergo.com",
       "og:site_name": "Exmergo",
       "twitter:site": "@exmergo"
     }
