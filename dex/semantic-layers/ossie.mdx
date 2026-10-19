@@ -102,8 +102,8 @@ deterministic:
 2. otherwise `ANSI_SQL`;
 3. otherwise the first supported SQL dialect in declaration order.
 
-Four of dex's seven connectors (DuckDB, Postgres, Redshift, ClickHouse) have no
-token in Ossie's enum. They fall to `ANSI_SQL` rather than to something close,
+Five of dex's eight connectors (DuckDB, Postgres, Redshift, ClickHouse, Trino)
+have no token in Ossie's enum. They fall to `ANSI_SQL` rather than to something close,
 because a wrong dialect is a worse answer than the portable one. Every declared
 expression is preserved whichever one dex reads. Cases:
 `dialect_selection`, `dialect_selection_falls_back_to_portable`.
@@ -215,4 +215,4 @@ Updating the hash alone is not an upgrade. The offline test checks that the four
 places agree with each other; it cannot check that anybody read the diff, and it
 should not be quoted as though it did.
 
-Source: [`references/ossie-compatibility.md`](https://github.com/exmergo/dex/blob/v1.14.1/references/ossie-compatibility.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/ossie-compatibility.md)). This page is generated; change the source, not the site.
+Source: [`references/ossie-compatibility.md`](https://github.com/exmergo/dex/blob/v1.15.0/references/ossie-compatibility.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/ossie-compatibility.md)). This page is generated; change the source, not the site.

@@ -64,6 +64,14 @@
     "destination": "/dex/connectors/clickhouse"
   },
   {
+    "source": "/dex/references/trino",
+    "destination": "/dex/connectors/trino"
+  },
+  {
+    "source": "/dex/references/trino.md",
+    "destination": "/dex/connectors/trino"
+  },
+  {
     "source": "/dex/references/semantic-layer",
     "destination": "/dex/semantic-layers/overview"
   },
@@ -102,6 +110,14 @@
   {
     "source": "/dex/references/pii-policy.md",
     "destination": "/dex/guardrails/pii-policy"
+  },
+  {
+    "source": "/dex/references/values-free-mode",
+    "destination": "/dex/guardrails/values-free-mode"
+  },
+  {
+    "source": "/dex/references/values-free-mode.md",
+    "destination": "/dex/guardrails/values-free-mode"
   },
   {
     "source": "/dex/references/canonical-model",

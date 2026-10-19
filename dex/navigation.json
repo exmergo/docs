@@ -15,7 +15,8 @@
           "group": "Guardrails",
           "pages": [
             "dex/guardrails/cost-controls",
-            "dex/guardrails/pii-policy"
+            "dex/guardrails/pii-policy",
+            "dex/guardrails/values-free-mode"
           ]
         },
         {
@@ -35,7 +36,8 @@
             "dex/connectors/databricks",
             "dex/connectors/redshift",
             "dex/connectors/postgres",
-            "dex/connectors/clickhouse"
+            "dex/connectors/clickhouse",
+            "dex/connectors/trino"
           ]
         },
         {
