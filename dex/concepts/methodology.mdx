@@ -2,6 +2,8 @@
 title: Exploration methodology
 sidebarTitle: Methodology
 description: 'How dex makes sense of a warehouse without enumerating it: one-pass inventory, ranking, aggregate-only profiling, join inference, and the persisted draft map.'
+og:title: Exploration methodology · Exmergo Dex
+twitter:title: Exploration methodology · Exmergo Dex
 ---
 
 dex explores the way an analytics engineer does: it ranks what matters, drills in
@@ -171,7 +173,7 @@ The flag itself is never removed by evidence. What a weak flag means is the
 consumer's decision, and the consumers differ: some gate on a flag's presence at
 any confidence, others compare it against a blocking threshold. That split, the
 threshold, and the only way a human clears a flag are in
-[ 0](/dex/guardrails/pii-policy).
+[`pii-policy.md`](/dex/guardrails/pii-policy).
 
 ## Relationships: joins from metadata, not scans
 
@@ -369,4 +371,4 @@ and a leak is a hard failure rather than a silent scrub. The agent reads the
 envelope and decides the next step, so multi-step exploration is the agent
 orchestrating stateless subcommands over the repository and the `.dex/` cache.
 
-Source: [`references/methodology.md`](https://github.com/exmergo/dex/blob/v1.15.0/references/methodology.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/methodology.md)). This page is generated; change the source, not the site.
+Source: [`references/methodology.md`](https://github.com/exmergo/dex/blob/v1.15.1/references/methodology.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/methodology.md)). This page is generated; change the source, not the site.

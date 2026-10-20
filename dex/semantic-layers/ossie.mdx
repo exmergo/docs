@@ -2,6 +2,8 @@
 title: Apache Ossie compatibility
 sidebarTitle: Apache Ossie
 description: What dex accepts from a native Apache Ossie semantic document, what it validates, what it derives for exploration and drift, and what it declines to claim.
+og:title: Apache Ossie compatibility · Exmergo Dex
+twitter:title: Apache Ossie compatibility · Exmergo Dex
 ---
 
 What dex accepts from a native [Apache Ossie](https://github.com/apache/ossie)
@@ -136,7 +138,7 @@ many screens the wrong column and reports the verdict as evidence-backed.
 PII linkage follows exactly this table. A dimension dex cannot resolve to a
 column is screened by the name heuristic and says so, rather than being screened
 against a column that is not behind it. The policy that linkage feeds is in
-[ 0](/dex/guardrails/pii-policy).
+[`pii-policy.md`](/dex/guardrails/pii-policy).
 
 ## Keys, relationships, snapshots, and authoring
 
@@ -195,7 +197,7 @@ Upstream moves; the pin does not, until somebody moves it deliberately.
 
 | delta | effect under this pin |
 |---|---|
-| upstream [added the  0 dialect](https://github.com/apache/ossie/commit/211ce662c2e122e3410ad6c737248e9516a06d3b) after the pinned commit | a document declaring it is refused, since the pinned enum does not define it. Case: `post_pin_thoughtspot_is_refused` |
+| upstream [added the `THOUGHTSPOT` dialect](https://github.com/apache/ossie/commit/211ce662c2e122e3410ad6c737248e9516a06d3b) after the pinned commit | a document declaring it is refused, since the pinned enum does not define it. Case: `post_pin_thoughtspot_is_refused` |
 | dex requires a semantic-model name to be unique across configured files | upstream validates one document at a time and has no cross-file rule |
 | dex requires a relationship's two column arrays to have equal length | upstream's schema constrains each array but not their lengths against each other |
 
@@ -215,4 +217,4 @@ Updating the hash alone is not an upgrade. The offline test checks that the four
 places agree with each other; it cannot check that anybody read the diff, and it
 should not be quoted as though it did.
 
-Source: [`references/ossie-compatibility.md`](https://github.com/exmergo/dex/blob/v1.15.0/references/ossie-compatibility.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/ossie-compatibility.md)). This page is generated; change the source, not the site.
+Source: [`references/ossie-compatibility.md`](https://github.com/exmergo/dex/blob/v1.15.1/references/ossie-compatibility.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/ossie-compatibility.md)). This page is generated; change the source, not the site.

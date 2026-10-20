@@ -2,6 +2,8 @@
 title: Running the lifecycle across processes
 sidebarTitle: Host integration
 description: 'Split the dex lifecycle across processes: export a verifiable plan, inspect dependencies and edits, apply offline, and read build evidence in a sandbox safely.'
+og:title: Running the lifecycle across processes · Exmergo Dex
+twitter:title: Running the lifecycle across processes · Exmergo Dex
 ---
 
 dex is designed for one process holding one project directory: you explore, you
@@ -483,7 +485,7 @@ The guarantee ships as an executable contract,
 `[values-free-conformance]` extra. Subclass it in your suite, override
 `make_engine` if you build engines differently, and run it against the release you
 pin. What the mode keeps, withholds and refuses, and the residual risks it does
-not close, are in [ 3](/dex/guardrails/values-free-mode).
+not close, are in [`values-free-mode.md`](/dex/guardrails/values-free-mode).
 
 ## What stays where it is
 
@@ -499,4 +501,4 @@ what it depends on, what the provider will enforce, and what a build established
 Deciding what to do with that is the host's job, and run identity, freshness
 windows, and who is allowed to approve what are the host's to supply.
 
-Source: [`references/host-integration.md`](https://github.com/exmergo/dex/blob/v1.15.0/references/host-integration.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/host-integration.md)). This page is generated; change the source, not the site.
+Source: [`references/host-integration.md`](https://github.com/exmergo/dex/blob/v1.15.1/references/host-integration.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/host-integration.md)). This page is generated; change the source, not the site.

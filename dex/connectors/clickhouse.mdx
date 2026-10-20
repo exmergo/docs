@@ -2,6 +2,8 @@
 title: ClickHouse connector
 sidebarTitle: ClickHouse
 description: 'Connect dex to self-hosted ClickHouse or ClickHouse Cloud: two-part namespaces, database-seconds or compute-seconds pricing, and read-only server caps.'
+og:title: ClickHouse connector · Exmergo Dex
+twitter:title: ClickHouse connector · Exmergo Dex
 ---
 
 The analytical database, self-hosted or ClickHouse Cloud. Namespace:
@@ -319,7 +321,7 @@ cap it never injected.
 
 `transform build --verify` costs only where the warehouse keeps no row count, so a
 table's count is free `system.tables` metadata; how the counts are priced into the
-build's own estimate is in [ 2](/dex/guardrails/cost-controls).
+build's own estimate is in [`cost-controls.md`](/dex/guardrails/cost-controls).
 
 `transform test --mutate` prices its whole batch as one number and confirms it
 once, then runs one dbt invocation per mutant. Nothing is materialized: a mutant
@@ -336,7 +338,7 @@ command, because dbt writes the relations it is judging there and that database
 is refused as a source everywhere else. The database need not exist yet:
 dbt-clickhouse creates it on a first build, and dex lists it after dbt has run.
 How that read is bounded is under **Read scope** in
-[ 2](/dex/reference/command-contract).
+[`command-contract.md`](/dex/reference/command-contract).
 
 The shipped `unpivot_json_object` macro has a ClickHouse implementation built on
 `ARRAY JOIN` over `JSONExtractKeysAndValuesRaw`, since ClickHouse has no lateral
@@ -401,4 +403,4 @@ probe that reports zero has lost `join_use_nulls`), and `events.occurred_at` has
 exactly three consecutive days missing from a 90-day span (so a continuity check
 that reports no gap has the window function wrong).
 
-Source: [`references/clickhouse.md`](https://github.com/exmergo/dex/blob/v1.15.0/references/clickhouse.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/clickhouse.md)). This page is generated; change the source, not the site.
+Source: [`references/clickhouse.md`](https://github.com/exmergo/dex/blob/v1.15.1/references/clickhouse.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/clickhouse.md)). This page is generated; change the source, not the site.

@@ -1,6 +1,8 @@
 ---
 title: Storage backends
 description: 'Where dex keeps its scratch state and how to replace it: the storage tiers, the spend ledger contract, serialized spend admission, and conformance tests.'
+og:title: Storage backends · Exmergo Dex
+twitter:title: Storage backends · Exmergo Dex
 ---
 
 dex writes two kinds of things, and only one of them is a storage backend's
@@ -373,7 +375,7 @@ held headroom for the rest of the UTC day; every entry carries the same keys wit
 joining settlements to reservations; and projecting the entry onto columns of
 your own diverges the first time dex adds a key. Sum what you are given. What
 each key holds, and what the three kinds mean to a reader, is in
-[ 1](/dex/guardrails/cost-controls).
+[`cost-controls.md`](/dex/guardrails/cost-controls).
 
 Two properties follow, and neither required a change to any backend written
 before reservations existed:
@@ -590,4 +592,4 @@ configuration model to bind against. The factory contract keeps the two concerns
 apart: a store is still just a class with the right methods, and construction is a
 separate thing you implement only if you want it.
 
-Source: [`references/storage.md`](https://github.com/exmergo/dex/blob/v1.15.0/references/storage.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/storage.md)). This page is generated; change the source, not the site.
+Source: [`references/storage.md`](https://github.com/exmergo/dex/blob/v1.15.1/references/storage.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/storage.md)). This page is generated; change the source, not the site.
