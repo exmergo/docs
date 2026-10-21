@@ -49,9 +49,11 @@ logic.
   resolved connector, its non-secret target coordinates, and the source of that
   resolution (`flag`, `.dex/config.yml`, `environment variable`,
   `dbt profiles.yml`, or `directory-local inference`). Commands that resolve no
-  warehouse keep the same shape with null/empty fields. The block is assembled
-  from facts already resolved by the command and never opens a connection or
-  spends merely to describe one.
+  warehouse keep the same shape with null/empty fields. This includes the
+  wrapper's missing-uv refusal and warm-up responses: their connection fields are
+  null/empty and all cost fields are null, because no warehouse was contacted or
+  query priced. The block is assembled from facts already resolved by the command
+  and never opens a connection or spends merely to describe one.
 - `DBT_PROFILES_DIR` locates `profiles.yml` for dbt operations and the
   last-resort credential fallback. It does **not** select dex's connector or
   override `--connector`/`--path` or `.dex/config.yml`; help and no-connector
@@ -393,6 +395,17 @@ hands it over via `--edits-file <path>` (or `-` for stdin), a JSON payload:
   {"path": "models/marts/dim_orders.sql", "kind": "model_sql", "op": "delete"}
 ]}
 ```
+
+Beside `edits`, `transform plan` and `semantic define|update|plan` accept a
+`declarations` list: per model, what one row is, which rows are in, what each column
+is, and the assumptions the model rests on with their evidence. Each is rendered
+into the model's existing YAML entry as a `schema_yml` edit in the same plan, and
+`edits` may be omitted when the payload only declares models that exist. The plan,
+apply and build envelopes then carry `data.decisions`, every assumption declared on
+the models the command touched. A command that takes no declarations refuses a
+payload carrying them rather than dropping them. The full shape, the refusals and
+what each field renders into:
+[`skills/transform/references/declarations.md`](https://github.com/exmergo/dex/blob/v1.15.2/skills/transform/references/declarations.md).
 
 `kind` is one of `model_sql`, `schema_yml`, `semantic_yml` (optional on
 `semantic define|update`, which imply `semantic_yml`), `packages_yml`,
@@ -749,7 +762,14 @@ replace) inlines a literal credential, so no secret ever reaches the diff.
   `needs_confirmation` estimate. It is a partial floor when a cold dev target has
   not built a node's inputs yet, and degrades to no estimate (with a note) when
   dex cannot open its own connection; the ceiling and the server-side
-  per-statement cap bind regardless. dbt runs with cwd pinned to the project dir
+  per-statement cap bind regardless. On BigQuery, an incremental node whose
+  batch filter is bounded by a subquery (the usual watermark over
+  `{{ this }}`) is an upper bound rather than a measurement: a dry run prunes
+  partitions only on a constant bound, and the job prunes on the subquery's
+  result when it runs. Its `per_table_bytes` line is kept, since it is still
+  what the job can bill at most, and `data.upper_bounds` maps each such line to
+  the column it bounds; a note, and the over-ceiling refusal, say how much of
+  the estimate those lines are. dbt runs with cwd pinned to the project dir
   (relative `profiles.yml` paths resolve there, never against the caller's
   shell). When
   `packages.yml` (or a `dependencies.yml` with packages) is declared and
@@ -1509,4 +1529,4 @@ before the engine logic was built, and the subcommands fill in against this
 fixed boundary. Exploration, authoring, and maintenance are live today; the Viz
 preview is the last stub, pending the Viz integration.
 
-Source: [`references/command-contract.md`](https://github.com/exmergo/dex/blob/v1.15.1/references/command-contract.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/command-contract.md)). This page is generated; change the source, not the site.
+Source: [`references/command-contract.md`](https://github.com/exmergo/dex/blob/v1.15.2/references/command-contract.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/command-contract.md)). This page is generated; change the source, not the site.
