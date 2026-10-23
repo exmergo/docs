@@ -5,14 +5,27 @@
   "description": "Documentation for Exmergo, the AI stack for your data stack, and for its products, starting with Dex, the agent-native analytics engineering toolkit.",
   "colors": {
     "primary": "#2563eb",
-    "light": "#60a5fa",
+    "light": "#51a2ff",
     "dark": "#2563eb"
   },
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg",
+    "href": "https://docs.exmergo.com"
+  },
+  "favicon": "/favicon.svg",
   "fonts": {
     "family": "Geist"
   },
   "appearance": {
     "default": "system"
+  },
+  "thumbnails": {
+    "appearance": "dark",
+    "background": "/images/og-background.png",
+    "fonts": {
+      "family": "Geist"
+    }
   },
   "navigation": {
     "products": [

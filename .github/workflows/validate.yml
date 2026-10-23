@@ -59,7 +59,10 @@ jobs:
           SYNC: ${{ contains(github.event.pull_request.labels.*.name, 'product-sync') }}
         run: |
           set -euo pipefail
-          touched=$(git diff --name-only "$BASE" "$HEAD" -- dex/ || true)
+          # Three dots: what the PR changed since it branched off. Comparing
+          # with the base branch's tip instead would count every product
+          # release published to main since then as this PR's own edit.
+          touched=$(git diff --name-only "$BASE...$HEAD" -- dex/ || true)
           if [ -z "$touched" ]; then
             echo "No product folder changed."
             exit 0
