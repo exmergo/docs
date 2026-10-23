@@ -1,0 +1,113 @@
+---
+noindex: true
+title: dex maintain
+sidebarTitle: maintain
+description: 'Reference for dex maintain: snapshot a baseline, check schema, volume, grain, and semantic drift, verify a project, and reconcile with proposed diffs.'
+---
+
+<Note>
+  You are reading the docs for dex v1.12 (v1.12.8). See the [latest version](/dex/cli/maintain).
+</Note>
+
+
+detect drift against the last snapshot and propose the fix
+
+## dex maintain snapshot
+
+```text
+dex maintain snapshot [--project-only]
+```
+
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--project-only` |  |  |
+
+## dex maintain check
+
+```text
+dex maintain check [<objects> ...]
+```
+
+**Arguments**
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `[<objects> ...]` |  |  |
+
+## dex maintain schema
+
+```text
+dex maintain schema [<objects> ...]
+```
+
+**Arguments**
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `[<objects> ...]` |  |  |
+
+## dex maintain volume
+
+```text
+dex maintain volume [<objects> ...]
+```
+
+**Arguments**
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `[<objects> ...]` |  |  |
+
+## dex maintain grain
+
+```text
+dex maintain grain [<objects> ...]
+```
+
+**Arguments**
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `[<objects> ...]` |  |  |
+
+## dex maintain semantic
+
+```text
+dex maintain semantic [<objects> ...]
+```
+
+**Arguments**
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `[<objects> ...]` |  |  |
+
+## dex maintain reconcile
+
+```text
+dex maintain reconcile [{schema,volume,grain,semantic}]
+```
+
+**Arguments**
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `[{schema,volume,grain,semantic}]` |  |  |
+
+## dex maintain verify
+
+```text
+dex maintain verify [<objects> ...]
+```
+
+**Arguments**
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `[<objects> ...]` |  |  |
+
+Every command here also accepts the [global options](/dex/v1.12/cli/overview#global-options).
+
+Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.12.8/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.

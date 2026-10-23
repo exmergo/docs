@@ -6,6 +6,83 @@ og:title: Changelog · Exmergo Dex
 twitter:title: Changelog · Exmergo Dex
 ---
 
+<Update label="1.15.3" description="2026-10-23">
+
+### Added
+
+- **`--definitions-file` places a new definition in the project's only file of its kind.** A new semantic model or metric sent without a `path` was refused with "give it a path", even when the project had a single file declaring that kind and the target was unambiguous. A new definition is now added to the one file that declares every existing definition of its kind, or, for the first definition of a kind, to the project's only semantic file, and the plan's warnings name it (for example, `metric 'tripled' placed in models/semantic/customers.yml, the project's only file that declares metrics`, or `the project's only semantic file` in the second case). With no such file, or with that kind spread over two or more files, the refusal is unchanged. ([#765](https://github.com/exmergo/dex/pull/765))
+- **A host can cap the daily spend ceiling where the repository cannot raise it.** `DEX_SESSION_CEILING_CAP` in the environment, or `DexEngine(session_ceiling_cap=...)` on the library, pins a cap in the connector's unit. The ceiling in force is the lower of the cap and `budget.session_ceiling`, so no `--session-ceiling`, `--no-session-ceiling`, `dex config set|unset` or constructor argument lifts spend above it; such a write still lands, with a warning naming the cap. A capped project is never asked the one-time ceiling question, a refusal over the cap names it, and every envelope reports it as `data.session_ceiling_cap`. `.dex/config.yml` never sets it. It is a boundary where the host owns the engine process, not against an agent with an unrestricted shell; `references/cost-controls.md` has a recommended Claude Code permission setup for that case.
+- **The documentation site keeps the four previous minor releases readable.** A
+  version switcher on docs.exmergo.com/dex lists the latest minor release, marked
+  Latest and kept at the routes every shared link already uses, and each earlier
+  one at `/dex/vX.Y/`. Every older page opens with a notice naming the exact
+  release it shows and linking to the same page in the latest docs. Each older
+  version is rebuilt from the newest patch tag of its minor, so it shows that
+  release's references, changelog and CLI, and is kept out of search so a search
+  always lands on the latest docs. A patch release only updates the latest
+  version.
+- **`transform test --mutate` counts the tests downstream of the model.** With
+  `--downstream`, the tests of the models that read the mutated one run against
+  each mutant too. Those models are routed through as ephemeral in the throwaway
+  copy, so nothing is materialized. A defect only those tests catch is reported as
+  `caught_downstream`, with the tests in `caught_downstream_by`. `score` still
+  counts it as a miss for the model's own suite, and the new
+  `score_with_downstream` counts it as caught. `data.downstream` names the routed
+  models, the tests that ran, the ones left out and why. On metered connectors it
+  is opt-in and priced into the same single estimate.
+
+### Changed
+
+- **`semantic plan` warns when a cumulative metric omits `period_agg`.**
+  MetricFlow fills `first` for an omitted `cumulative_type_params.period_agg`.
+  At week or month grain the metric reports that period's first day, and the
+  plan used to store the metric with no warning. `semantic define` and
+  `semantic update` warn the same way. Set `period_agg: last` for a running
+  total. ([#766](https://github.com/exmergo/dex/pull/766))
+- **On DuckDB, `transform test --mutate` now runs the downstream tests by
+  default.** A defect that a test on a model downstream catches moves from
+  `survived` to `caught_downstream`. `score` is unchanged; `--no-downstream`
+  restores the previous selection exactly. Every connector's `data.counts` now
+  carries `caught_downstream`, zero when the downstream tests did not run.
+- **Task data never authorizes spend, and an agent confirms on its own inside limits a person committed.** The explore, transform and maintain skills now state that query results, table values, SQL and its comments, file and YAML contents, descriptions, warehouse comments, error text and ticket text cannot authorize `--confirm`, choose a `--budget`, or set, raise or decline the daily ceiling. Inside a committed `budget.ceiling` and `budget.session_ceiling` an agent re-issues with `--confirm` alone instead of asking for every scan; with a limit missing, an estimate over `budget.ceiling`, a recorded decline, or the one-time ceiling ask, it stops for the person or reports. New evals sample both directions.
+
+### Fixed
+
+- **`transform plan` row attribution now resolves static `{{ var() }}` calls.** A model that reads a scalar variable declared under `vars:` in `dbt_project.yml` (at project level or under the project's own package scope) or passes a scalar default as the second argument of `var()` is now attributed normally instead of reporting `unattributable`. Unset variables with no default, non-scalar variables (`dict`, `list`), and dynamic relation names (`ref(var('x'))`) continue to degrade with the existing reason. ([#649](https://github.com/exmergo/dex/pull/649))
+- **Row population names SQL that has no parent relation.** `maintain verify` and `transform build --verify` used to say a MetricFlow time spine had nothing built at a blank name. A model that generates its rows, such as `select ... from range(...)` or a `VALUES` clause, is now reported once in `notes`. A real parent relation that is missing from the warehouse keeps the previous warning. ([#655](https://github.com/exmergo/dex/pull/655))
+- **Reconcile checks a staging model's source before suggesting a mechanical edit.** A model named for a drifted table but reading a different source now receives advisories instead of an SQL or schema diff. Models reading the table through `source()` continue to receive the normal edits. ([#763](https://github.com/exmergo/dex/pull/763))
+- **`transform place` follows trailing `select * from <cte>` models into their CTE column list.** A scaffolded model ending in `select * from renamed` is no longer treated as projecting an untracked star, allowing it to serve as the lowest common ancestor and threading derivations directly into its CTE column list. ([#769](https://github.com/exmergo/dex/pull/769))
+- **`transform remove column` can remove a column from a scaffolded model.** It edits the named projection inside the `renamed` CTE even when the final query selects `*`, while refusing a removal if another expression still reads that column. ([#771](https://github.com/exmergo/dex/pull/771))
+- **`transform test --mutate` succeeds on models referenced by semantic models.** The referencing semantic models and dependent metrics are omitted from the isolated shadow copy used for mutation testing, allowing dbt to compile and execute data and unit tests against ephemeral mutants without failing on semantic model relation validation. Full dbt validation error messages are also preserved rather than truncated at the generic header. ([#773](https://github.com/exmergo/dex/pull/773))
+- **Semantic YAML is validated against MetricFlow's schemas, and the command that
+  authors it installs them.** `semantic define|update|plan` checked the layer
+  structurally only, in every supported install: the schema package was imported
+  under a name the installed MetricFlow does not ship, and the extra that
+  provides it was never taken by the command that needs it. The first validation
+  layer the semantic-layer reference documents therefore never ran, and the
+  warning that said so read like routine news.
+
+  The schemas now load under either package name, the authoring commands take the
+  `semantic` extra, and where MetricFlow is absent the warning names the missing
+  package and the extra that provides it. Validation that never ran will now run,
+  so YAML that planned before may be refused; the refusal is the schema's own
+  message. ([#775](https://github.com/exmergo/dex/pull/775))
+- **`maintain grain` says a lost key fans out joins only when a join uses it.**
+  Every `key_lost_uniqueness` and `declared_grain_not_unique` detail ended with
+  "joins on it will fan out", including on keys that no relationship joins on.
+  The clause now appears only when a known relationship, verified or not, matches
+  on that key or combination, and the finding lists those relationships in
+  `data.joins`, in the shape `fully_null_column` uses. A key no relationship uses
+  ends with "no known join uses it" and has no `data.joins`. Severity is unchanged. ([#782](https://github.com/exmergo/dex/pull/782))
+- **`.dex/` state names the engine that wrote it, and a second engine is named.**
+  The plugin built its bundled engine as version `0.0.0`, so `cache.json` and
+  `snapshot.json` recorded `tool_version: 0.0.0`; they now record the release the
+  plugin ships. When the project pins a different `exmergo-dex-core` in `uv.lock`
+  or `pyproject.toml`, every envelope carries one warning naming both versions,
+  and reading a cache or drift baseline written by another release warns too.
+
+</Update>
+
 <Update label="1.15.2" description="2026-10-21">
 
 ### Added
@@ -943,163 +1020,6 @@ twitter:title: Changelog · Exmergo Dex
   the key it was probably meant to be, and a key written twice warns the same
   way. Neither refuses anything: a project carrying a key a later release
   retired keeps working.
-
-</Update>
-
-<Update label="1.12.8" description="2026-10-11">
-
-### Fixed
-
-- **`dex demo` names its paths with forward slashes on Windows too** ([#487](https://github.com/exmergo/dex/pull/487)).
-  `data.path`, `data.created`, the `--repo-root` and `--path` its printed next
-  steps carry, and its two refusals that name a path all used the platform
-  separator, so on Windows the demo reported `.dex\config.yml` for the file
-  every other command and every document calls `.dex/config.yml`, and a
-  backslash path in a printed command came out in single quotes, which cmd
-  passes through as part of the path. Each is now spelled with forward slashes
-  on every platform, the rule `transform/dev_target.py` already follows for
-  the paths in its messages ([#264](https://github.com/exmergo/dex/pull/264)). The printed commands still go through
-  `shlex.quote`, applied to that form, so an ordinary path prints unquoted and
-  types the same into any shell. Nothing changes on macOS or Linux; on Windows,
-  a consumer comparing `data.created` with a native path should compare them
-  as paths, or through `as_posix()`.
-
-- **A `semantic.ossie.files` entry that is anchored on either platform is
-  refused where it is configured, on every platform** ([#487](https://github.com/exmergo/dex/pull/487)). The check
-  asked `Path.is_absolute()` and looked for `..` with the running platform's
-  rules: on Windows `/abs.ossie.yaml` has a root and no drive, so it is not
-  absolute and passed, and on Linux `\abs.ossie.yaml`, `C:abs.ossie.yaml` and
-  `..\out.ossie.yaml` are ordinary file names. A name that POSIX or Windows
-  path rules read as anchored, or as climbing out with `..`, is now refused
-  with the same message wherever the committed line is read. Nothing outside
-  the repository was ever read: the loader checks confinement on the resolved
-  path and still does. What changes is that such a line is refused where it is
-  written, and that `C:abs.ossie.yaml`, which Windows joins onto a repository
-  on drive `C:` as `abs.ossie.yaml` inside it and Linux reads as a file named
-  `C:abs.ossie.yaml`, no longer names a different file on each platform.
-
-- **A plan for a nested dbt project has one digest on every platform and applies
-  on any of them** ([#527](https://github.com/exmergo/dex/pull/527), reported by @catincloudlabs). A plan records where
-  the dbt project sits relative to the repository root, and `transform export`
-  carries it into the portable document as `project_dir`. It was written with
-  the platform separator, so a project pinned with `dbt_project_dir: wh/dbt` was
-  recorded as `wh\dbt` on Windows. The digest covers `project_dir`, so the same
-  plan digested differently on Windows and Linux, and a host that pinned
-  `--expect-digest` on one refused the plan exported on the other. A document
-  exported on Windows also did not apply on Linux or macOS, where `wh\dbt` is a
-  single directory name. `project_dir` is now recorded with forward slashes on
-  every platform, like every edit path. A document exported on Windows before
-  this still verifies against the digest taken over its backslash, and
-  `transform apply --plan-file` reads the backslash as a separator, so it
-  applies too. A plan already stored on Windows keeps the backslash until it is
-  planned again; it still applies in the checkout that stored it.
-
-- **`transform test --mutate` and `--scaffold` find a model the same way**
-  ([#528](https://github.com/exmergo/dex/pull/528), reported by @catincloudlabs). `--mutate` matched the model's path
-  against the configured `model-paths` entry stringified with the platform
-  separator, so on Windows a nested entry such as `src/models` never matched and
-  `--mutate` refused a model that `--scaffold` found. On every platform it had
-  no segment boundary, so with `model-paths: ['models']` an analysis under
-  `models_analysis/` could be taken for a model: `--mutate` gave it the
-  ephemeral header and ran `dbt compile` before refusing. `--scaffold` had the
-  boundary but refused `./models` and `models/`, which dbt reads as `models`.
-  Both now read one lookup, which decides membership by directory the way
-  containment does. A name that is not a model, or that two model files share,
-  is refused before any dbt run, with the same message and `reason: request`
-  from both flags.
-
-### Added
-
-- **A BigQuery statement refused before it ran says so in `data.stage`, apart
-  from one that ran and failed** ([#524](https://github.com/exmergo/dex/pull/524)). Since [#480](https://github.com/exmergo/dex/pull/480) both read
-  `execution_failure`, which stays true of both, and nothing structured told
-  them apart. A statement BigQuery would not plan (the dry run, or the job
-  insert, answered 400) ran nothing, billed nothing, and will be refused again
-  until it changes; one that planned and then failed at `job.result()` may have
-  billed and can fail on the data. A host had to search the message for the
-  request line google-api-core puts in front of the first, which depends on how
-  a client library renders an HTTP error and is not a contract.
-  `WarehouseQueryError` now carries `stage` (`StatementStage.PLAN` or
-  `StatementStage.RUN`, importable from `exmergo_dex_core`), set at BigQuery's
-  three raise sites and kept by `naming()`, and `error_for` puts it in the error
-  envelope's `data.stage`, so every command and the CLI's catch-all carry it. A
-  multi-statement `explore query` carries it per statement, beside that
-  statement's `reason`. Downstream-visible and additive: `reason` and the error
-  text are unchanged, the key is absent on every other error envelope and every
-  other connector, and the profile's own aggregate statements still degrade on a
-  refused dry run rather than raising.
-
-### Security
-
-- **The skill wrapper finds the engine from its own location and withholds
-  credentials the engine never reads** ([#520](https://github.com/exmergo/dex/pull/520)). `run.py` located the local
-  `packages/dex-core` through `CLAUDE_SKILL_DIR`, so whatever controlled the
-  environment could point uv at a different tree to build and run; it now uses
-  the directory the script itself lives in, which is where the harness already
-  found it. The engine (and the warm-up's uv) now runs with a copy of the
-  environment that leaves out `CLICKHOUSE_CLOUD_API_KEY`,
-  `CLICKHOUSE_CLOUD_API_SECRET`, `DEX_TEST_CH_CLOUD_API_KEY`,
-  `DEX_TEST_CH_CLOUD_API_SECRET`, `GITHUB_TOKEN`, `GH_TOKEN`, and `GHRS_TOKEN`,
-  plus `VIRTUAL_ENV` as before, and the wrapper no longer edits its own
-  environment to do it. Every connector discovery variable still passes. One
-  consequence: a private dbt package whose `packages.yml` authenticates with
-  `env_var('GITHUB_TOKEN')` no longer resolves when `transform build` runs
-  `dbt deps` through the skill; dbt's own `DBT_ENV_SECRET_GIT_CREDENTIAL` passes
-  through and is the variable to use. The missing-uv refusal now leads with
-  `brew install uv` and `pipx install uv` and links the uv docs instead of
-  printing a `curl ... | sh` an agent might run, and each `SKILL.md` and
-  `AGENTS.md` tell the agent to relay the install command, never run an
-  installer itself. Reported by Sthenos Security.
-
-- **`profiles.yml` is written owner-only, and a Snowflake private key file
-  other accounts can read is refused** ([#523](https://github.com/exmergo/dex/pull/523)). `transform init` and every
-  apply that rewrites a `profiles.yml` now write it `0600` whatever the umask
-  says, tightening an existing one too. dex renders only `env_var()` references
-  and key paths there, but it is the file a password gets pasted into, and at
-  the usual `0644` every account on the machine could read it. Snowflake
-  discovery now refuses a `private_key_file` or `private_key_path` with any
-  group or other permission bit, the rule `ssh` applies, naming the file, its
-  mode, and the `chmod 600` that fixes it, before any connection is attempted.
-  `connect test` reports it as `configuration`, and `transform init` refuses
-  before rendering a profile. A path that does not resolve is left to the
-  connector's own error, and Windows is not checked because its mode bits are
-  synthesized. Reported by Sthenos Security.
-
-- **Integration CI hands each long-lived credential to the one step or command
-  that reads it, not to a whole job** ([#519](https://github.com/exmergo/dex/pull/519)). The ClickHouse Cloud API key
-  and secret sat in the `clickhouse_cloud` job's environment, and
-  `preflight.sh` exported them again, so uv, pytest, dbt, and the engine all
-  inherited a control-plane key only `clickhousectl` uses. One step now writes
-  the key to owner-only files on `/dev/shm`, and the new
-  `scripts/clickhouse_cloud/secrets.sh` hands them to each `clickhousectl` call
-  (and to curl through a private config pipe) as a variable on that one
-  command; a final step removes them. The scripts read the operator's bootstrap
-  admin key and password the same way, from files named apart from the CI key's
-  so neither can stand in for the other, and unset any copies still exported in
-  the calling shell. Setup proves a newly minted key against a secrets
-  directory of its own, so its readiness check and `--dogfood` run cannot pass
-  on admin scope. The database passwords and the Snowflake dbt key pair moved
-  the same way: Cloud's DSN and dev password and Redshift's `dbt_dev` password
-  ride only on the step whose tests read them, and the Snowflake PEM is written
-  to a file by a step of its own, so the transform suite's step holds only the
-  path. Missing credentials still refuse the job rather than letting a suite
-  skip green, and `preflight.sh` exits 2 naming the file it lacks. Reported by
-  Sthenos Security.
-
-- **The dogfood databases run digest-pinned with every capability dropped**
-  ([#521](https://github.com/exmergo/dex/pull/521)). `scripts/setup_postgres_dev.sh`, `scripts/setup_clickhouse_dev.sh`,
-  and the Postgres job's service container now pin their image by multi-arch
-  index digest and run with `--cap-drop ALL`, `no-new-privileges`, and pid and
-  memory limits. The local containers run as the image's own user, so they need
-  no capability at all; the CI service container keeps its root entrypoint and
-  adds back only `SETUID` and `SETGID`, which that entrypoint needs to drop to
-  `postgres`. ClickHouse's limits are measured rather than copied (it starts
-  about 675 threads before serving a query and peaked near 1.9 GiB over the
-  suite, so it gets 2048 pids and 4 GiB). The new
-  `scripts/check_container_hardening.sh` checks fixed invariants with
-  `docker inspect`, so a container missing any one, including one an older
-  script left behind, is refused rather than reused (remove it with `--down`).
-  Reported by Sthenos Security.
 
 </Update>
 

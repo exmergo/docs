@@ -1,0 +1,173 @@
+---
+noindex: true
+title: dex explore
+sidebarTitle: explore
+description: 'Reference for dex explore: every read-only subcommand for inventory, profiling, joins, diagrams, guarded queries, clustering, and semantic layers, with flags.'
+---
+
+<Note>
+  You are reading the docs for dex v1.12 (v1.12.8). See the [latest version](/dex/cli/explore).
+</Note>
+
+
+make sense of a warehouse: rank objects, profile columns, infer joins
+
+## dex explore inventory
+
+```text
+dex explore inventory [--rank] [--limit LIMIT] [--all]
+```
+
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--rank` |  |  |
+| `--limit LIMIT` |  |  |
+| `--all` |  |  |
+
+## dex explore profile
+
+```text
+dex explore profile [--check-cumulative] [--columns {all}] [--refresh]
+    [--use-project] <objects> [<objects> ...]
+```
+
+**Arguments**
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `<objects> [<objects> ...]` |  |  |
+
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--check-cumulative` |  |  |
+| `--columns {all}` |  |  |
+| `--refresh` |  |  |
+| `--use-project` |  |  |
+
+## dex explore relationships
+
+```text
+dex explore relationships [--verify] [--infer-by-overlap] [--refresh]
+    [--use-project] [--use-hosted-semantic-layer]
+```
+
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--verify` |  |  |
+| `--infer-by-overlap` |  |  |
+| `--refresh` |  |  |
+| `--use-project` |  |  |
+| `--use-hosted-semantic-layer` |  |  |
+
+## dex explore map
+
+```text
+dex explore map [--full] [--detail] [--verify] [--infer-by-overlap]
+    [--refresh] [--use-project] [--use-hosted-semantic-layer]
+```
+
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--full` |  |  |
+| `--detail` |  |  |
+| `--verify` |  |  |
+| `--infer-by-overlap` |  |  |
+| `--refresh` |  |  |
+| `--use-project` |  |  |
+| `--use-hosted-semantic-layer` |  |  |
+
+## dex explore diagram
+
+```text
+dex explore diagram [--full]
+```
+
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--full` |  |  |
+
+## dex explore query
+
+```text
+dex explore query [--sql-file SQL_FILE] [--no-auto-profile] [<sql> ...]
+```
+
+**Arguments**
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `[<sql> ...]` |  |  |
+
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--sql-file SQL_FILE` |  |  |
+| `--no-auto-profile` |  |  |
+
+## dex explore cluster
+
+```text
+dex explore cluster [--no-auto-profile] [--features FEATURES] [--clusters K]
+    <object>
+```
+
+**Arguments**
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `<object>` |  |  |
+
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--no-auto-profile` |  |  |
+| `--features FEATURES` |  |  |
+| `-k`, `--clusters K` |  |  |
+
+## dex explore semantic
+
+```text
+dex explore semantic [--metric METRIC] [--for-dimension FOR_DIMENSION]
+    [--search SEARCH] [--full] [--group-by GROUP_BY] [--where WHERE]
+    [--order-by ORDER_BY] [--grain GRAIN] [--limit LIMIT] [--local] [--api]
+    [{list,values,query}] [<metrics> ...]
+```
+
+**Arguments**
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `[{list,values,query}]` |  | `list` |
+| `[<metrics> ...]` |  |  |
+
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--metric METRIC` |  |  |
+| `--for-dimension FOR_DIMENSION` |  |  |
+| `--search SEARCH` |  |  |
+| `--full` |  |  |
+| `--group-by GROUP_BY` |  |  |
+| `--where WHERE` |  |  |
+| `--order-by ORDER_BY` |  |  |
+| `--grain GRAIN` |  |  |
+| `--limit LIMIT` |  |  |
+| `--local` |  |  |
+| `--api` |  |  |
+
+Every command here also accepts the [global options](/dex/v1.12/cli/overview#global-options).
+
+Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.12.8/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.

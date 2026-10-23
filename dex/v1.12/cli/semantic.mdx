@@ -1,0 +1,100 @@
+---
+noindex: true
+title: dex semantic
+sidebarTitle: semantic
+description: 'Reference for dex semantic: define, update, and plan dbt semantic models or native Apache Ossie documents as reviewable diffs, with every flag documented.'
+---
+
+<Note>
+  You are reading the docs for dex v1.12 (v1.12.8). See the [latest version](/dex/cli/semantic).
+</Note>
+
+
+define dbt or native Ossie semantics as reviewable diffs
+
+## dex semantic define
+
+```text
+dex semantic define [--edits-file EDITS_FILE]
+    [--definitions-file DEFINITIONS_FILE] [--no-parse] [<argument>]
+```
+
+**Arguments**
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `[<argument>]` |  |  |
+
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--edits-file EDITS_FILE` |  |  |
+| `--definitions-file DEFINITIONS_FILE` |  |  |
+| `--no-parse` |  |  |
+
+## dex semantic update
+
+```text
+dex semantic update [--edits-file EDITS_FILE]
+    [--definitions-file DEFINITIONS_FILE] [--no-parse] [<argument>]
+```
+
+**Arguments**
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `[<argument>]` |  |  |
+
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--edits-file EDITS_FILE` |  |  |
+| `--definitions-file DEFINITIONS_FILE` |  |  |
+| `--no-parse` |  |  |
+
+## dex semantic plan
+
+```text
+dex semantic plan [--edits-file EDITS_FILE]
+    [--definitions-file DEFINITIONS_FILE] [--no-parse] [<argument>]
+```
+
+**Arguments**
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `[<argument>]` |  |  |
+
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--edits-file EDITS_FILE` |  |  |
+| `--definitions-file DEFINITIONS_FILE` |  |  |
+| `--no-parse` |  |  |
+
+## dex semantic ossie
+
+```text
+dex semantic ossie [--edits-file EDITS_FILE] [{define,update,plan}]
+    [<argument>]
+```
+
+**Arguments**
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `[{define,update,plan}]` |  |  |
+| `[<argument>]` |  |  |
+
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--edits-file EDITS_FILE` |  |  |
+
+Every command here also accepts the [global options](/dex/v1.12/cli/overview#global-options).
+
+Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.12.8/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.

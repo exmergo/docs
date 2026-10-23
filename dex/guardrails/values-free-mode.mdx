@@ -192,7 +192,9 @@ later release adds fails the suite until someone decides it is safe. Override
 ## What it does not claim
 
 These are residual risks the mode names rather than closes. A host bounds them
-with a cost ceiling and a query count per run.
+with a cost ceiling it pins itself (`DEX_SESSION_CEILING_CAP`; see
+[`cost-controls.md`](/dex/guardrails/cost-controls#a-host-set-cap-on-the-daily-ceiling)) and a
+query count per run.
 
 - **Membership probing.** `select count(*) from t where email = 'a@b.c'` returns a
   number, and enough such probes test guesses about values.
@@ -200,4 +202,4 @@ with a cost ceiling and a query count per run.
 - **An aggregate over one row is that row's value.** `select avg(salary) from t
   where id = 42` is accepted and returns a salary.
 
-Source: [`references/values-free-mode.md`](https://github.com/exmergo/dex/blob/v1.15.2/references/values-free-mode.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/values-free-mode.md)). This page is generated; change the source, not the site.
+Source: [`references/values-free-mode.md`](https://github.com/exmergo/dex/blob/v1.15.3/references/values-free-mode.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/values-free-mode.md)). This page is generated; change the source, not the site.

@@ -1,0 +1,56 @@
+---
+noindex: true
+title: dex CLI overview
+sidebarTitle: Overview
+description: 'Every dex CLI command at a glance: global options, connection flags shared by all subcommands, and where to start, generated from the released argparse tree.'
+---
+
+<Note>
+  You are reading the docs for dex v1.12 (v1.12.8). See the [latest version](/dex/cli/overview).
+</Note>
+
+
+Explore an unfamiliar warehouse, transform it with reviewable dbt edits, and maintain it as the world drifts.
+
+## Getting oriented
+
+Point it at data with `--connector`/`--path`, or commit a connector: block to .dex/config.yml (found by walking up from the working directory).
+
+DBT_PROFILES_DIR only locates dbt profiles.yml for dbt operations and the last-resort credential fallback; it does not select dex's connector or override `--connector`/`--path` or .dex/config.yml.
+
+No warehouse yet: `dex demo` seeds a local one, no credentials needed. Have one already: `dex explore map` is the command to run first -- it ranks what matters, profiles it, and infers how the tables join.
+
+`dex <group> --help` lists a group's own subcommands.
+
+## Command groups
+
+| Group | What it does |
+| --- | --- |
+| [`dex connect`](/dex/v1.12/cli/connect) | check a connector's own credentials and capabilities |
+| [`dex explore`](/dex/v1.12/cli/explore) | make sense of a warehouse: rank objects, profile columns, infer joins |
+| [`dex transform`](/dex/v1.12/cli/transform) | author and refactor dbt models, tests, and the semantic layer |
+| [`dex semantic`](/dex/v1.12/cli/semantic) | define dbt or native Ossie semantics as reviewable diffs |
+| [`dex maintain`](/dex/v1.12/cli/maintain) | detect drift against the last snapshot and propose the fix |
+| [`dex viz`](/dex/v1.12/cli/viz) | preview the semantic layer (not yet implemented) |
+| [`dex demo`](/dex/v1.12/cli/demo) | create a seeded local DuckDB warehouse to try dex against (no credentials, no network) |
+
+## Global options
+
+Every command accepts these. The last column says where on the command line each one may go.
+
+| Option | Description | Position |
+| --- | --- | --- |
+| `--connector CONNECTOR` |  | before the group or after the subcommand |
+| `--path PATH` |  | before the group or after the subcommand |
+| `--scope SCOPE` |  | before the group or after the subcommand |
+| `--project PROJECT` |  | before the group or after the subcommand |
+| `--dataset DATASET` |  | before the group or after the subcommand |
+| `--repo-root REPO_ROOT` |  | before the group or after the subcommand |
+| `--cache-backend CACHE_BACKEND` |  | before the group only |
+| `--project-format PROJECT_FORMAT` |  | before the group only |
+| `--confirm` |  | before the group or after the subcommand |
+| `--budget BUDGET` |  | before the group or after the subcommand |
+| `--session-ceiling SESSION_CEILING` |  | before the group or after the subcommand |
+| `--no-session-ceiling` |  | before the group or after the subcommand |
+
+Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.12.8/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.

@@ -212,11 +212,12 @@ dex transform place [--targets MODELS] [--expr SQL] [--explain] [<column>]
 
 ## dex transform test
 
-`--scaffold` plans a unit_tests skeleton for a model. `--mutate` plants one defect at a time and reports which ones no test caught. Mutation runs dbt on the dev target and is billed on metered connectors.
+`--scaffold` plans a unit_tests skeleton for a model. `--mutate` plants one defect at a time and reports which ones no test caught; `--downstream` also counts the tests of the models that read it. Mutation runs dbt on the dev target and is billed on metered connectors.
 
 ```text
 dex transform test [--scaffold MODEL | --mutate MODEL] [--max-mutants N]
     [--target TARGET] [--check-equivalence | --no-check-equivalence]
+    [--downstream | --no-downstream]
 ```
 
 **Options**
@@ -229,6 +230,8 @@ dex transform test [--scaffold MODEL | --mutate MODEL] [--max-mutants N]
 | `--target TARGET` | dbt dev target to mutate against |  |
 | `--check-equivalence` | compare each survivor with the model on the dev data |  |
 | `--no-check-equivalence` | report survivors without comparing them |  |
+| `--downstream` | also run the tests of the models downstream of it |  |
+| `--no-downstream` | run only the model's own tests |  |
 
 ## dex transform export
 
@@ -294,4 +297,4 @@ dex transform preflight [--target TARGET]
 
 Every command here also accepts the [global options](/dex/cli/overview#global-options).
 
-Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.15.2/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.
+Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.15.3/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.

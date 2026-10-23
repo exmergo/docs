@@ -135,6 +135,13 @@ and unasked here: one aggregate `dbt show` per survivor, plus one self-check of
 the unmutated model against itself, labels it `equivalent` or
 `distinguishable`. `--no-check-equivalence` turns that off.
 
+The tests of the models downstream of the mutated one run against each mutant
+too, unasked here because it is free: each downstream model is made ephemeral in
+the same copy, so dbt inlines the chain, mutant at the bottom, into each of its
+tests. A defect only those tests caught is `caught_downstream`, and `score`
+still counts it as a miss for the model's own suite. `--no-downstream` turns
+that off.
+
 
 
 The dev target being the source file is also why `transform init`'s content
@@ -161,4 +168,4 @@ paradigms layer onto the proven loop at v0.2. It also matches ADE-bench's
 DuckDB mode and Spider2.0-DBT's dbt engine, so the test engine and the benchmark
 engine are the same engine.
 
-Source: [`references/duckdb.md`](https://github.com/exmergo/dex/blob/v1.15.2/references/duckdb.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/duckdb.md)). This page is generated; change the source, not the site.
+Source: [`references/duckdb.md`](https://github.com/exmergo/dex/blob/v1.15.3/references/duckdb.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/duckdb.md)). This page is generated; change the source, not the site.

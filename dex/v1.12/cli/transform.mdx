@@ -1,0 +1,271 @@
+---
+noindex: true
+title: dex transform
+sidebarTitle: transform
+description: 'Reference for dex transform: every subcommand that authors, plans, applies, builds, and tests dbt changes, with each flag, default, and positional argument.'
+---
+
+<Note>
+  You are reading the docs for dex v1.12 (v1.12.8). See the [latest version](/dex/cli/transform).
+</Note>
+
+
+author and refactor dbt models, tests, and the semantic layer
+
+## dex transform init
+
+```text
+dex transform init [--layered-schemas] [--in-place] [<argument>]
+```
+
+**Arguments**
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `[<argument>]` |  |  |
+
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--layered-schemas` |  |  |
+| `--in-place` | scaffold into the current directory instead of &lt;name>/ |  |
+
+## dex transform plan
+
+```text
+dex transform plan [--edits-file EDITS_FILE] [--scaffold SCAFFOLD]
+    [--attribute-rows | --no-attribute-rows] [<argument>]
+```
+
+**Arguments**
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `[<argument>]` |  |  |
+
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--edits-file EDITS_FILE` |  |  |
+| `--scaffold SCAFFOLD` |  |  |
+| `--attribute-rows` | measure the row-population delta of each change |  |
+| `--no-attribute-rows` | name row-affecting changes without measuring them |  |
+
+## dex transform apply
+
+```text
+dex transform apply [--plan-file PLAN_FILE] [--expect-digest EXPECT_DIGEST]
+    [<argument>]
+```
+
+**Arguments**
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `[<argument>]` |  |  |
+
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--plan-file PLAN_FILE` |  |  |
+| `--expect-digest EXPECT_DIGEST` |  |  |
+
+## dex transform build
+
+```text
+dex transform build [--target TARGET] [--select SELECT] [--verify]
+    [--for-plan FOR_PLAN] [--for-plan-file FOR_PLAN_FILE] [--no-install-deps]
+```
+
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--target TARGET` |  |  |
+| `--select SELECT` |  |  |
+| `--verify` |  |  |
+| `--for-plan FOR_PLAN` |  |  |
+| `--for-plan-file FOR_PLAN_FILE` |  |  |
+| `--no-install-deps` |  |  |
+
+## dex transform deps
+
+```text
+dex transform deps
+```
+
+## dex transform plans
+
+```text
+dex transform plans
+```
+
+## dex transform macro
+
+```text
+dex transform macro [<argument>]
+```
+
+**Arguments**
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `[<argument>]` |  |  |
+
+## dex transform references
+
+```text
+dex transform references [--kind KIND] [--full] <names> [<names> ...]
+```
+
+**Arguments**
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `<names> [<names> ...]` |  |  |
+
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--kind KIND` |  |  |
+| `--full` |  |  |
+
+## dex transform rename
+
+```text
+dex transform rename [--edits-file EDITS_FILE] <kind> <old> <new>
+```
+
+**Arguments**
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `<kind>` |  |  |
+| `<old>` |  |  |
+| `<new>` |  |  |
+
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--edits-file EDITS_FILE` |  |  |
+
+## dex transform remove
+
+```text
+dex transform remove [--edits-file EDITS_FILE] <kind> <name>
+```
+
+**Arguments**
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `<kind>` |  |  |
+| `<name>` |  |  |
+
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--edits-file EDITS_FILE` |  |  |
+
+## dex transform place
+
+```text
+dex transform place [--targets TARGETS] [--expr EXPR] [--explain] [<argument>]
+```
+
+**Arguments**
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `[<argument>]` |  |  |
+
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--targets TARGETS` |  |  |
+| `--expr EXPR` |  |  |
+| `--explain` |  |  |
+
+## dex transform test
+
+```text
+dex transform test [--scaffold SCAFFOLD | --mutate MUTATE]
+    [--max-mutants MAX_MUTANTS] [--target TARGET]
+    [--check-equivalence | --no-check-equivalence]
+```
+
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--scaffold SCAFFOLD` |  |  |
+| `--mutate MUTATE` |  |  |
+| `--max-mutants MAX_MUTANTS` |  |  |
+| `--target TARGET` |  |  |
+| `--check-equivalence` | compare each survivor with the model on the dev data |  |
+| `--no-check-equivalence` | report survivors without comparing them |  |
+
+## dex transform export
+
+```text
+dex transform export [<argument>]
+```
+
+**Arguments**
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `[<argument>]` |  |  |
+
+## dex transform ground
+
+```text
+dex transform ground [<argument>]
+```
+
+**Arguments**
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `[<argument>]` |  |  |
+
+## dex transform classify
+
+```text
+dex transform classify [--edits-file EDITS_FILE] [<argument>]
+```
+
+**Arguments**
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `[<argument>]` |  |  |
+
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--edits-file EDITS_FILE` |  |  |
+
+## dex transform preflight
+
+```text
+dex transform preflight [--target TARGET]
+```
+
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--target TARGET` |  |  |
+
+Every command here also accepts the [global options](/dex/v1.12/cli/overview#global-options).
+
+Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.12.8/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.
