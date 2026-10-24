@@ -3,7 +3,7 @@
   "description": "Agent-native analytics engineering",
   "versions": [
     {
-      "version": "v1.15",
+      "version": "v1.16",
       "default": true,
       "tag": "Latest",
       "tabs": [
@@ -103,6 +103,109 @@
           "tab": "Changelog",
           "pages": [
             "dex/changelog"
+          ]
+        }
+      ]
+    },
+    {
+      "version": "v1.15",
+      "tabs": [
+        {
+          "tab": "Documentation",
+          "groups": [
+            {
+              "group": "Get started",
+              "pages": [
+                "dex/v1.15/index"
+              ]
+            },
+            {
+              "group": "Guardrails",
+              "pages": [
+                "dex/v1.15/guardrails/cost-controls",
+                "dex/v1.15/guardrails/pii-policy",
+                "dex/v1.15/guardrails/values-free-mode"
+              ]
+            },
+            {
+              "group": "Concepts",
+              "pages": [
+                "dex/v1.15/concepts/source-of-truth",
+                "dex/v1.15/concepts/methodology",
+                "dex/v1.15/concepts/dbt-project"
+              ]
+            },
+            {
+              "group": "Connectors",
+              "pages": [
+                "dex/v1.15/connectors/duckdb",
+                "dex/v1.15/connectors/bigquery",
+                "dex/v1.15/connectors/snowflake",
+                "dex/v1.15/connectors/databricks",
+                "dex/v1.15/connectors/redshift",
+                "dex/v1.15/connectors/postgres",
+                "dex/v1.15/connectors/clickhouse",
+                "dex/v1.15/connectors/trino"
+              ]
+            },
+            {
+              "group": "Semantic layers",
+              "pages": [
+                "dex/v1.15/semantic-layers/overview",
+                "dex/v1.15/semantic-layers/ossie"
+              ]
+            },
+            {
+              "group": "Guides",
+              "pages": [
+                "dex/v1.15/guides/ossie-semantic-layer"
+              ]
+            }
+          ]
+        },
+        {
+          "tab": "Reference",
+          "groups": [
+            {
+              "group": "CLI",
+              "pages": [
+                "dex/v1.15/cli/overview",
+                "dex/v1.15/cli/connect",
+                "dex/v1.15/cli/explore",
+                "dex/v1.15/cli/transform",
+                "dex/v1.15/cli/semantic",
+                "dex/v1.15/cli/maintain",
+                "dex/v1.15/cli/config",
+                "dex/v1.15/cli/viz",
+                "dex/v1.15/cli/demo"
+              ]
+            },
+            {
+              "group": "Using dex",
+              "pages": [
+                "dex/v1.15/reference/command-contract"
+              ]
+            },
+            {
+              "group": "Extending dex",
+              "pages": [
+                "dex/v1.15/reference/project-formats",
+                "dex/v1.15/reference/storage-backends",
+                "dex/v1.15/reference/host-integration"
+              ]
+            },
+            {
+              "group": "Project",
+              "pages": [
+                "dex/v1.15/reference/evaluation"
+              ]
+            }
+          ]
+        },
+        {
+          "tab": "Changelog",
+          "pages": [
+            "dex/v1.15/changelog"
           ]
         }
       ]
