@@ -126,10 +126,10 @@ dex transform macro [<macro>]
 
 ## dex transform references
 
-Report every use of each name across model SQL, YAML, macros, seeds and installed packages, and say how complete the answer is. Repo-only and free.
+Report every use of each name across model SQL, YAML, macros, seeds and installed packages, and say how complete the answer is. With `--usage`, also how other models filter, branch on or aggregate each model.column. Repo-only and free.
 
 ```text
-dex transform references [--kind KIND] [--full] <name> [<name> ...]
+dex transform references [--kind KIND] [--full] [--usage] <name> [<name> ...]
 ```
 
 **Arguments**
@@ -144,6 +144,7 @@ dex transform references [--kind KIND] [--full] <name> [<name> ...]
 | --- | --- | --- |
 | `--kind KIND` | narrow to one kind, such as model, column, var or metric |  |
 | `--full` | lift the cap of 200 occurrences across 50 files |  |
+| `--usage` | also report how other models use each model.column |  |
 
 ## dex transform rename
 
@@ -297,4 +298,4 @@ dex transform preflight [--target TARGET]
 
 Every command here also accepts the [global options](/dex/cli/overview#global-options).
 
-Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.16.0/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.
+Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.16.1/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.

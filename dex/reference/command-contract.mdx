@@ -65,6 +65,10 @@ subcommands are **stateless**: the agent orchestrates multi-step flows by
 re-reading them between calls. Credentials never cross this boundary, and nothing
 reaches agent context except through the sanitized envelope: values cross only
 from profiled, PII-cleared columns, bounded and capped by the query firewall.
+Every `errors` and `warnings` entry is redacted as the envelope is printed
+(`key=value` and `key: value` secrets, `Bearer` and `Authorization:` credentials,
+query-string secrets, and URL passwords), since a message often quotes text dex
+did not write.
 
 ## The command surface
 
@@ -207,7 +211,9 @@ dex transform init "<name>"       -> bootstrap a dbt project skeleton; requires 
                                      namespace already holds objects (free metadata check)
 dex transform plan "<intent>"     -> proposed dbt edits as diffs (nothing applied yet)
 dex transform apply [plan-id]     -> write diffs into the dbt project (a reviewable git diff);
-                                     no id means the latest unapplied plan of any kind
+                                     no id means the latest unapplied plan of any kind; once
+                                     something is written, data.commit_trailer is the
+                                     Co-authored-by line the commit of those files ends with
 dex transform plans               -> list stored plans, pending and applied, newest first
 dex transform references <name>   -> where each name is used: model SQL, schema.yml, dbt_project.yml,
   [more...] [--kind K] [--full]      macros, semantic YAML, seed headers, installed packages. Repo-only
@@ -218,7 +224,9 @@ dex transform references <name>   -> where each name is used: model SQL, schema.
                                      under data.indeterminate rather than dropped. data.completeness is
                                      `complete` only once every reason to doubt it is ruled out, and
                                      data.limits names the rest. Capped, with every elision in notes;
-                                     --full lifts the caps
+                                     --full lifts the caps. --usage adds, for each model.column, how
+                                     other models filter, branch on or aggregate it, grouped and
+                                     counted (a bare column name is refused)
 dex transform rename <kind>       -> every edit the rename needs, as one plan: the definition, every
   <old> <new> [--edits-file <f>]     model that selects it, every schema.yml that documents or tests it,
                                      every semantic reference, and a seed header. <kind> is one of
@@ -305,7 +313,10 @@ dex transform classify [plan-id]  -> what each edit's content contains, from the
     [--edits-file <f>]               operation and never from the declared kind or the filename:
                                      declarative, executable, authority_bearing, data, or unknown, with
                                      the signal that decided it and where it sits. Content that does
-                                     not parse is unknown and never declarative. Repo-only and free
+                                     not parse is unknown and never declarative. A dependency entry
+                                     is executable; dispatch, flags, a profile, a dex guard key, and
+                                     an env_var() read are authority_bearing; an env_var() with a
+                                     computed name is unknown. Repo-only and free
 dex transform preflight           -> what the warehouse will enforce on the next guarded build, read
                                      from the project's rendered profiles.yml rather than from what dex
                                      would write there: the provider-side controls, what each binds,
@@ -411,10 +422,22 @@ is, and the assumptions the model rests on with their evidence. Each is rendered
 into the model's existing YAML entry as a `schema_yml` edit in the same plan, and
 `edits` may be omitted when the payload only declares models that exist. The plan,
 apply and build envelopes then carry `data.decisions`, every assumption declared on
-the models the command touched. A command that takes no declarations refuses a
-payload carrying them rather than dropping them. The full shape, the refusals and
+the models the command touched. The plan envelope also carries
+`data.declarations.<model>` for every model the plan creates, edits or declares:
+`drafted` (facts the `.dex/` cache and the SQL support, each with its evidence),
+`declared` (what the post-change YAML says) and `missing` (intent fields nobody
+supplied, each also a warning). `drafted.precedent` says what the project's other
+models do with each column the model filters, branches on or aggregates, and a
+literal compared to a column whose complete cached domain does not hold it is a
+warning. On a model that already exists, `contradictions` lists each declared rule
+(population filter, grain, declared column, an upstream column's additivity) that
+the edit and the post-change declaration disagree on, each also a warning naming
+the side that looks stale and both fixes; it never refuses. It reads the cache and
+the repository only and opens no connection; a contradicted population cites the
+delta row attribution measured, and measures nothing of its own. A command that takes no declarations refuses a payload
+carrying them rather than dropping them. The full shape, the refusals and
 what each field renders into:
-[`skills/transform/references/declarations.md`](https://github.com/exmergo/dex/blob/v1.16.0/skills/transform/references/declarations.md).
+[`skills/transform/references/declarations.md`](https://github.com/exmergo/dex/blob/v1.16.1/skills/transform/references/declarations.md).
 
 `kind` is one of `model_sql`, `schema_yml`, `semantic_yml` (optional on
 `semantic define|update`, which imply `semantic_yml`), `packages_yml`,
@@ -638,7 +661,13 @@ passes this gate.
 project-root config files into the same plan/diff/apply flow; because they carry
 project-wide settings and connection targets, they are gated by dbt's own parser
 at plan time, and a `profiles_yml` edit is refused if it (or the file it would
-replace) inlines a literal credential, so no secret ever reaches the diff.
+replace) inlines a literal credential, so no secret ever reaches the diff. A
+key reads as a credential when its name contains one (`db_password`,
+`jwt_token`), and its value is safe only when the whole value is one
+`{{ env_var('NAME') }}` reference, with an empty default at most
+(`{{ env_var('NAME', '') }}`): a literal beside the reference, a non-empty
+default, or a filter or operator after it is refused. A key naming a location
+(`private_key_path`, `token_uri`) holds no secret and is exempt.
 
 - `transform init "<name>" --connector <duckdb|snowflake|bigquery|databricks|postgres>`
   bootstraps a dbt project when none exists: `dbt_project.yml`, `models/staging/`
@@ -774,6 +803,12 @@ replace) inlines a literal credential, so no secret ever reaches the diff.
   applies the latest unapplied plan of any kind (semantic plans included; `emit
   dbt` remains the semantic-scoped spelling). `transform plans` lists what is
   stored, pending and applied.
+- **A commit of what dex wrote credits Dex.** dex never commits, so an apply
+  that wrote at least one file, from the store or from `--plan-file`, hands the
+  credit to whoever does: `data.commit_trailer` is
+  `Co-authored-by: Dex <dex@exmergo.com>`, the last paragraph of that commit's
+  message. The forge credits the account with that email verified. An apply
+  that wrote nothing, or stopped at `needs_confirmation`, carries no trailer.
 - **A plan can leave the process that made it.** `transform export` returns the
   stored plan as a document, and `transform apply --plan-file` applies one in a
   checkout whose plan store has never seen it. That path needs a repo root and
@@ -1340,11 +1375,24 @@ The gate, in order:
    string*: `"select 1; select 2"` stays refused whether it arrives alone or
    alongside other arguments. Separate arguments are the supported way to ask
    several questions, because they keep the statement boundaries explicit
-   instead of asking the parser to find them.
+   instead of asking the parser to find them. A call to a function that reads
+   outside the relations a statement names is refused by name wherever it sits,
+   projection, FROM or subquery: server files (`pg_read_file`, DuckDB
+   `read_csv`/`read_parquet`/`read_text`, `glob`), URLs and object stores
+   (ClickHouse `url`, `s3`, `hdfs`), other databases (`remote`, `mysql`,
+   `postgresql`, `dblink`, BigQuery `EXTERNAL_QUERY`), and SQL held in a string
+   (DuckDB `query`, Trino `system.query`, Postgres `query_to_xml`). The reason is
+   `unapproved_function`. No setting lifts it, `guards.approved_functions`
+   included, because a setting that could would live in a file an agent may
+   write.
 2. **Resolve against the cache, then against the connection.** Every table and
    column must exist in `.dex/cache.json`, because profiling is what makes the
    PII policy computable and the firewall cannot judge a column whose flags it
-   does not have. What follows from a cache miss is not a refusal, though: the
+   does not have. That holds for every table the statement reads, not only the
+   ones it projects from: a subquery under WHERE, EXISTS, IN, HAVING, a join's
+   ON or ORDER BY is resolved the same way, since a table nobody profiled is
+   still an oracle over its values when it is only used as a filter. What
+   follows from a cache miss is not a refusal, though: the
    object is looked up in the live inventory, and if the connection has it, it is
    profiled and the query then runs. This covers the case no amount of upfront
    exploration can, a relation built since the last inventory (a model `dbt run`
@@ -1613,4 +1661,4 @@ before the engine logic was built, and the subcommands fill in against this
 fixed boundary. Exploration, authoring, and maintenance are live today; the Viz
 preview is the last stub, pending the Viz integration.
 
-Source: [`references/command-contract.md`](https://github.com/exmergo/dex/blob/v1.16.0/references/command-contract.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/command-contract.md)). This page is generated; change the source, not the site.
+Source: [`references/command-contract.md`](https://github.com/exmergo/dex/blob/v1.16.1/references/command-contract.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/command-contract.md)). This page is generated; change the source, not the site.

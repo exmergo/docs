@@ -160,7 +160,11 @@ the repo, never a relation from the warehouse.
 
 Every dbt subprocess runs with its working directory pinned to the project dir, so
 relative paths in `profiles.yml` and anywhere else resolve against the project, not
-the caller's shell cwd. When the project declares packages (`packages.yml`, or a
+the caller's shell cwd. Its environment is the caller's minus the credentials dbt
+never reads (`GITHUB_TOKEN`, `GH_TOKEN`, `DBT_SL_TOKEN`, the ClickHouse Cloud API
+key and secret, AI provider API keys), because any macro, a package's included,
+can read any variable through `env_var()`; warehouse credentials a profile reads
+still reach it. When the project declares packages (`packages.yml`, or a
 `dependencies.yml` with a `packages:` key) and `dbt_packages/` is missing or empty,
 `transform build` runs `dbt deps` automatically before building; `transform deps`
 is the explicit install/refresh. Package installation writes only `dbt_packages/`
@@ -173,4 +177,4 @@ throwaway directory, overlays the proposed YAML, and runs `dbt parse` there, so
 nothing the parser writes touches the real project. When dbt is unavailable the
 parse degrades to a warning rather than a hard failure.
 
-Source: [`references/dbt-project.md`](https://github.com/exmergo/dex/blob/v1.16.0/references/dbt-project.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/dbt-project.md)). This page is generated; change the source, not the site.
+Source: [`references/dbt-project.md`](https://github.com/exmergo/dex/blob/v1.16.1/references/dbt-project.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/dbt-project.md)). This page is generated; change the source, not the site.
