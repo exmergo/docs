@@ -6,6 +6,102 @@ og:title: Changelog · Exmergo Dex
 twitter:title: Changelog · Exmergo Dex
 ---
 
+<Update label="1.16.2" description="2026-10-26">
+
+### Added
+
+- **`recompute_outcome` and `verify_build_evidence` guard `BuildEvidence` contracts.**
+  `BuildEvidence` validates that its stated outcome matches what its nodes, coverage,
+  plan drift, and artifact freshness establish, refusing contradictory documents. Hosts
+  can call `recompute_outcome` to independently derive an outcome from evidence or a raw
+  document, and `verify_build_evidence` to validate consistency and assert an expected
+  verdict. `BuildEvidenceError` is raised on invalid documents or outcome mismatches. ([#826](https://github.com/exmergo/dex/pull/826))
+- **`maintain` reports a changed declaration as drift, even when the SQL is
+  untouched.** A declaration records which rows a model keeps, what one row is and
+  how each measure adds up, so changing one changes what the model's numbers mean.
+  `maintain snapshot` now fingerprints each model's declaration (its descriptions
+  and `config.meta.dex`, per model and per column) as one hash per field, and
+  reports the count as `data.transform_layer.declared_model_count`. `maintain
+  semantic` and `maintain check` report `declaration_changed`, naming the model,
+  the column and the field, plus `declaration_added` and `declaration_removed`.
+  A population, grain, additivity, unit or aggregation change ranks above a
+  description change. Reflowing a description, reordering a grain or moving the
+  entry to another file is not a change. The check reads only the repository and
+  the snapshot, so it is free on every connector. `data.declaration_drift` says
+  whether it ran. A baseline pinned before this release reports it as unchecked,
+  with a warning, rather than as clean: re-run `maintain snapshot --project-only`
+  to baseline declarations without re-measuring the warehouse. `maintain
+  reconcile` answers these findings with advisories and never rewrites a
+  declaration.
+- `transform build --verify` and `maintain verify` now check what a model's
+  declaration says against the relation dbt built. A declared grain is the first
+  grain source, so a composite grain is checked with no `dbt_utils` test. Three new
+  findings: `unit_out_of_range` (a `fraction` outside 0 to 1, or a `percent` whose
+  values all sit within 0 to 1, stating the observed minimum and maximum),
+  `additivity_contradicted` (a column declared `additive` that the cumulative
+  detector reads as a running total), and `population_contradicted` (a value a
+  population filter excludes still present, stated as a count). Every check is an
+  aggregate-only statement, free on DuckDB and priced into the same single estimate
+  or offer on a billed connector. `data.suppressed` names `unit`, `additivity` and
+  `population` whenever one could not run, so a declaration that was not checked
+  never reads as one that held.
+
+### Changed
+
+- **A key that only lost uniqueness because a tenant arrived reads `medium`.**
+  `maintain check` and `maintain grain` used to report `key_lost_uniqueness` at
+  `high` whenever a single-column key from the baseline stopped being unique, even
+  when it was never the grain and the rows had only been added along another
+  column, such as a second repository on a per-repository, per-day table. When the
+  key is not the grain and is still unique together with a column the baseline
+  read as constant, the finding now reads `medium`, its detail says so, and
+  `data.still_unique_as` names the combination. A real duplicate repeats that
+  combination, so it stays `high`, as does a lost grain. A host that gates on
+  `high` stops blocking on the first case. Either way, a lost key that is not the
+  grain now says whether the grain still holds, in `data.grain_holds` and the
+  detail, read from the count the axis already takes; that alone never lowers the
+  severity. The extra combinations are planned and
+  priced with the axis: on BigQuery they ride the table's one batched statement,
+  and elsewhere they run only for a table where a key was lost. ([#823](https://github.com/exmergo/dex/pull/823))
+
+### Fixed
+
+- **`transform init` keeps comments and unread keys in an existing `.dex/config.yml`.**
+  When a repo already has a config, init amends only the keys it sets through the
+  same in-place editor as `dex config set`, so comments, key order, unread keys,
+  and an explicit `null` (for example `cluster.sample_seed`) survive. A repo with
+  no config still gets a fresh file from `save_config`. ([#824](https://github.com/exmergo/dex/pull/824))
+- **`transform plan` drops a Dex-scaffolded empty `.gitkeep` when the first model lands.**
+  When a plan upserts the first real file into `models/staging`, `intermediate`, or
+  `marts` and that folder still holds only an empty `.gitkeep` from `transform init`,
+  the plan includes a delete for the keeper so apply removes it under the same
+  guard. ([#825](https://github.com/exmergo/dex/pull/825))
+- **`dex config unset` can remove duplicate occurrences of keys.** When a key is written more than once in `.dex/config.yml`, `dex config unset <key>` removes the earlier occurrence that YAML ignored and keeps the winning value. `dex config unset --duplicate` cleans up duplicate occurrences across the file without changing effective settings. ([#827](https://github.com/exmergo/dex/pull/827))
+- **`explore diagram` suggests `--full` when objects have no edges.** When the exploration cache contains profiled datasets but no relationships, running `explore diagram` now advises running with `--full` to render unjoined objects, instead of reporting that no drawable objects exist. ([#846](https://github.com/exmergo/dex/pull/846))
+- **`maintain drift` ranks `possible_rename` candidates by name similarity.** When multiple added columns of the same type could match a dropped column, drift detection now produces a single finding with candidate renames ranked by token and string similarity rather than reporting unranked combinations. ([#847](https://github.com/exmergo/dex/pull/847))
+- **ClickHouse statement refusals use the shared warehouse error type.** Server
+  errors outside the existing named connection and budget refusals now raise
+  `WarehouseQueryError`, retaining the server code and query stage with a bounded
+  diagnostic. A refused grain measurement no longer aborts verification of the
+  other models, and values-free mode reports `warehouse_refused` while withholding
+  the server's message. ([#852](https://github.com/exmergo/dex/pull/852))
+- **Measure warnings identify the fields still missing.** `transform plan` now names only the absent aggregation, additivity, or unit for each measure and groups measures missing the same fields. The per-column `data.declarations.<model>.missing` paths are unchanged. ([#853](https://github.com/exmergo/dex/pull/853))
+- **`explore map` and `explore relationships` no longer suggest a dbt project is missing when it was found. With `--use-project`, a repository whose dbt project declares no foreign keys used to get the note "no declared relationships (no dbt project or no declared foreign keys)". The note now says "no declared relationships (dbt project declares no foreign keys)", and "no declared relationships (no dbt project)" is kept for a repository without one. ([#863](https://github.com/exmergo/dex/pull/863))
+- **Reconcile finds tests on staging models whose names already start with `stg_`.** Grain drift on `stg_orders` previously looked for `stg_stg_orders.yml` and incorrectly advised adding a `unique` test. It now reads the existing staging declaration and leaves an already-failing uniqueness test unchanged. ([#864](https://github.com/exmergo/dex/pull/864))
+- Fixed false "no declared role" warnings when partially redeclaring a model whose existing YAML declaration already defines column roles. ([#865](https://github.com/exmergo/dex/pull/865))
+- **ClickHouse Cloud's capacity probe waits out a waking service.** A service
+  resuming from idle answers `clusterAllReplicas` in part, or not at all, for a few
+  seconds, and every billed command refused with advice to grant access the
+  identity already held. The probe now re-reads for about 15 seconds before
+  refusing, the refusal names the server's own reason, and a denied grant still
+  refuses at once.
+- `explore profile --check-cumulative` runs on ClickHouse. The detector's probe
+  used `LAG`, which ClickHouse does not have, so the check failed there; it now
+  uses `lagInFrame` over an explicit frame, with a NULL default so an entity's
+  first row is not counted as an observation.
+
+</Update>
+
 <Update label="1.16.1" description="2026-10-25">
 
 ### Added
@@ -948,136 +1044,6 @@ twitter:title: Changelog · Exmergo Dex
   as equivalent or distinguishable (including mutants that turn a column to NULL)
   instead of reporting `not_checked`. The equivalence check remains opt-in via
   `--check-equivalence` and is priced into the upfront compute-seconds estimate.
-
-</Update>
-
-<Update label="1.13.2" description="2026-10-14">
-
-### Added
-
-- **`semantic.vendor: slayer` configuration and a pinned `[slayer]` extra**
-  ([#596](https://github.com/exmergo/dex/issues/596)). The first step toward
-  SLayer as a third semantic vendor ([#595](https://github.com/exmergo/dex/issues/595)):
-  configuration and packaging only. The reader, authoring and drift land
-  separately. `semantic.slayer.base_dir` names SLayer's storage root inside the
-  repository, and `semantic.slayer.models` is an exact allowlist of
-  `models/<data_source>/<name>.yaml` files under it, with the same rules as
-  `semantic.ossie.files` (no globs, no absolute paths, no `..`, no duplicates).
-  SLayer datasource files and `priority.yaml` are refused, because a datasource
-  carries connection credentials. `[slayer]` pins `motley-slayer==1.2.0` exactly
-  and carries `[sql]`, so an install lands where SLayer's sqlglot floor and dex's
-  ceiling overlap (30.17 to 30.x). A new blocking CI job resolves the two
-  together. With `vendor: slayer` set and the extra absent, a command refuses with
-  `reason: prerequisite` and names the install, and MetricFlow semantic models
-  are not read in SLayer's place. The skill wrapper installs `[slayer]` for
-  `maintain` commands only where the config names that vendor.
-
-- **Manifests for Copilot CLI, Cursor, Kiro and Gemini CLI, and a listing name and
-  links in the Claude Code manifest** ([#607](https://github.com/exmergo/dex/pull/607)). Copilot CLI, Cursor Marketplace and
-  Kiro read an Agent Plugins 1.0 `plugin.json` at the plugin root. The Gemini CLI
-  extensions gallery lists only repositories that carry a `gemini-extension.json`.
-  dex shipped neither. Both now sit at the repository root with the name, version
-  and description of `.claude-plugin/plugin.json`; the Agent Plugins manifest also
-  carries its keywords. The Claude Code manifest gains
-  `displayName` ("Exmergo Dex", since another plugin named `dex` exists),
-  `privacyPolicyUrl` and `supportUrl`, which the Claude plugin directory reads for
-  its listing. `name` stays `dex`, since it is the install id and the `/dex:*`
-  namespace. `scripts/prepare_release.sh <engine> <plugin-semver>` now bumps the
-  version in all three manifests, and `tests/test_plugin_manifests.py` fails the
-  release gate when their name, version, description or keywords disagree.
-
-- **The README says what dex runs and connects to, and where it runs** ([#607](https://github.com/exmergo/dex/pull/607)).
-  A new section lists each download and connection:
-  - `uv` downloading the pinned `exmergo-dex-core` and its dependencies, plus a
-    managed Python when no 3.11 or newer is installed.
-  - The warehouse you configure, which gets read-only SQL.
-  - The hosted dbt Cloud Semantic Layer, when you enable it.
-  - The dbt commands dex runs, which are dbt-core's own: dbt-core sends its
-    anonymous usage statistics unless you turn them off, and `dbt deps` downloads
-    the packages `packages.yml` declares.
-  - Nothing to Exmergo.
-
-  It also says dex needs a coding agent with a local shell and does not run in
-  claude.ai chat, and it links the dex privacy policy. The `uv` prerequisite drops
-  its `curl | sh` installer line in favor of `brew install uv`, `pipx install uv`
-  and the uv installation docs, the advice the skill wrapper has printed since
-  [#530](https://github.com/exmergo/dex/pull/530). skills.sh's security audit flagged that line as downloading and running
-  remote code.
-
-- **Each skill names the engine package it runs, and states what it needs**
-  ([#607](https://github.com/exmergo/dex/pull/607)). Each SKILL.md's "Running the engine" section names `exmergo-dex-core`
-  on PyPI, at the version `scripts/run.py` pins, and links its source. Without
-  that, a reader of the skill alone could not tell what gets downloaded. The
-  frontmatter gains the Agent Skills `compatibility` field: a local shell and
-  `uv`, the engine fetched from PyPI on first use, and no claude.ai chat.
-  `claude plugin validate --strict`, `vally lint` and `npx skills` all accept it.
-
-- **`exmergo-dex-core` declares PyPI classifiers, connector keywords, and changelog
-  and issue URLs** ([#607](https://github.com/exmergo/dex/pull/607)). It had no classifiers, its keywords named no
-  connector other than DuckDB, and its only links were the homepage and the
-  repository. There is no `License ::` classifier, because under PEP 639 the SPDX
-  `license` field replaces it.
-
-### Changed
-
-- **Native semantic authoring validates through the configured layer, not
-  through Ossie by name** ([#597](https://github.com/exmergo/dex/issues/597)).
-  `semantic <vendor> define|update|plan` reaches one vendor-neutral route, and
-  the layer validates its own documents through a new
-  `SemanticEditTarget.validate_semantic_edits` method, which returns a
-  `SemanticEditValidation`. Ossie implements it by delegating to its existing
-  validator, so Ossie authoring behaves as before. A third-party semantic
-  source that implements `SemanticEditTarget` must add the method to stay
-  authorable. A subcommand that does not match `semantic.vendor` (for example
-  `semantic ossie plan` under `vendor: dbt`) is now refused before the edits
-  payload or any document is read, and a vendor that cannot author names the
-  vendors that can. `DexEngine.semantic_native(vendor, mode, intent, edits)` is
-  the library route; `DexEngine.semantic_ossie` remains and delegates to it.
-
-- **The three skill descriptions fit the Agent Skills 1,024-character cap**
-  ([#607](https://github.com/exmergo/dex/pull/607)). `explore` goes from 1,601 to 1,014 characters, `transform` from 1,617
-  to 1,002, and `maintain` from 1,600 to 1,015. The descriptions retain explore's
-  schema-verification precondition, transform's bug-fix scope and validation
-  before writing, and maintain's diagnostic and drift triggers, along with their
-  guardrails and sibling pointers. A frontmatter test holds the description cap
-  and the optional `compatibility` field's 500-character cap.
-
-### Fixed
-
-- **`dex config validate` reports a `dbt_project_dir` that holds no dbt
-  project** ([#590](https://github.com/exmergo/dex/pull/590)). A pin to a directory that does not exist, or to one with
-  no `dbt_project.yml`, passed validation, and the mistake surfaced later from
-  whichever command first needed the project, not always as a message about the
-  pin. It is now a non-fatal `project_not_found` problem on the pin's line, so
-  `explore map` and `explore query` still run and every command carries it in
-  `warnings`, the same as an `unknown_key`.
-
-- **`host.plan_digest` reads a plan document as a dict, JSON string or bytes**
-  ([#580](https://github.com/exmergo/dex/pull/580)). It accepted only a `PortablePlan`, so the dict that
-  `DexEngine.export_plan(...).plan` returns failed with a builtin
-  `AttributeError`. It now takes the same four forms as `verify_plan_document`,
-  returns the same digest for each, and raises `PlanDocumentError` for input
-  that is not a readable plan. It still runs none of the other checks, so a
-  caller can digest a document it has not verified yet.
-
-- **`maintain` again claims diagnosis without a prior snapshot or known change**
-  ([#607](https://github.com/exmergo/dex/pull/607)). Commit `7f9a0ba` reverted the description introduced by [#534](https://github.com/exmergo/dex/issues/534)
-  for [#233](https://github.com/exmergo/dex/pull/233), so 1.13.0 and 1.13.1 shipped the earlier drift-only description
-  despite the 1.13.0 changelog entry. The shortened description restores the
-  diagnostic intent, names `maintain verify` beside snapshot-based `check` and
-  `reconcile`, and includes requests such as "the project is broken" and
-  "diagnose why this test fails". Writing the fix remains transform's job.
-
-- **`Budget.paradigm` is removed; it validated and did nothing** ([#557](https://github.com/exmergo/dex/pull/557)). A
-  command's cost paradigm comes from its connector (`connect.paradigm_for`),
-  never from the budget, so the field was accepted, type-checked against the
-  `Paradigm` enum, and then read by nothing: the accepted-and-ignored shape
-  this codebase refuses everywhere else (see the `ClickHouseTarget` deployment
-  checks). A committed `budget.paradigm: bytes_scanned` looked like it declared
-  the project's cost paradigm and changed nothing. The field is gone, and a
-  committed `budget.paradigm` now rides every envelope's `warnings` as an
-  `unknown_key` (`dex config get`/`dex config validate`, [#547](https://github.com/exmergo/dex/pull/547)), the same as
-  any other key a later release retired, rather than silently doing nothing.
 
 </Update>
 

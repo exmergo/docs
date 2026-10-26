@@ -359,7 +359,9 @@ dex maintain snapshot [--project-only]
                                   -> capture/refresh the known-good baseline in .dex/snapshot.json;
                                      --project-only re-fingerprints only project layers and carries the
                                      existing warehouse baseline and its timestamps forward without opening
-                                     a warehouse connection
+                                     a warehouse connection; each model's declaration (descriptions and
+                                     config.meta.dex, per model and per column) is fingerprinted as one
+                                     hash per field, counted in transform_layer.declared_model_count
 dex maintain check                -> sweep every drift axis vs the snapshot; ranked report (read-only;
                                      two-phase on billed connectors: free axes now, one estimate for scans)
 dex maintain schema [<objects>]   -> structural drift: columns/tables added, dropped, retyped, renamed;
@@ -372,8 +374,12 @@ dex maintain grain [<objects>]    -> cardinality/identity drift: lost key unique
                                      fanout, the grains the project declares re-verified, and declared
                                      join arity measured (join_cardinality_exceeded)
                                      (aggregates; gated by --confirm --budget on billed connectors)
-dex maintain semantic [<objects>] -> definition drift and dangling refs (free) + categorical dimension
-                                     cardinality change (a scan; gated on billed connectors)
+dex maintain semantic [<objects>] -> definition drift and dangling refs (free) + declaration drift
+                                     (declaration_added|removed|changed naming the model, column and
+                                     field, population/grain/additivity/unit ranked above a description;
+                                     free; data.declaration_drift says whether it was checked) +
+                                     categorical dimension cardinality change (a scan; gated on billed
+                                     connectors)
 dex maintain reconcile [<class>]  -> propose the edits that reconcile detected drift, as a stored plan
                                      of diffs tagged mechanical/advisory (applied with transform apply);
                                      a SLayer layer's own removals as a second plan, semantic_plan_id
@@ -392,9 +398,18 @@ dex maintain verify [<selector>]  -> is the project correct right now, no .dex/s
                                      count made exact where counting bills nothing; a relation the
                                      warehouse keeps no count for (any view) is priced as one batched
                                      aggregate and returned as an offer beside findings already final.
-                                     A project that fails to compile is reported first and suppresses
-                                     every other check; data.suppressed names each finding class that
-                                     did not run and why
+                                     Grain: the grain a declaration states first, then a unique test,
+                                     a unique_combination_of_columns test, a primary entity, or a
+                                     naming guess, one source per model. Declared facts, checked with
+                                     aggregate-only statements: unit_out_of_range (a fraction outside
+                                     0..1, a percent wholly inside it, with the observed min and max),
+                                     additivity_contradicted (an additive column the cumulative
+                                     detector reads as a running total), population_contradicted (an
+                                     excluded value still present, as a count), each class priced into
+                                     the same single offer on a metered connector. A project that fails
+                                     to compile is reported first and suppresses every other check;
+                                     data.suppressed names each finding class that did not run and why,
+                                     declared-fact classes (unit, additivity, population) included
 dex viz preview                   -> emit the dbt semantic model to the Viz preview (not yet implemented;
                                      the Viz integration arrives later)
 ```
@@ -426,8 +441,11 @@ the models the command touched. The plan envelope also carries
 `data.declarations.<model>` for every model the plan creates, edits or declares:
 `drafted` (facts the `.dex/` cache and the SQL support, each with its evidence),
 `declared` (what the post-change YAML says) and `missing` (intent fields nobody
-supplied, each also a warning). `drafted.precedent` says what the project's other
-models do with each column the model filters, branches on or aggregates, and a
+supplied, each also a warning). For measures, warnings name only the missing
+`aggregation`, `additivity`, or `unit` fields and group columns with the same
+missing fields; the `missing` list keeps its per-column paths unchanged.
+`drafted.precedent` says what the project's other models do with each column
+that the model filters, branches on or aggregates, and a
 literal compared to a column whose complete cached domain does not hold it is a
 warning. On a model that already exists, `contradictions` lists each declared rule
 (population filter, grain, declared column, an upstream column's additivity) that
@@ -437,7 +455,7 @@ the repository only and opens no connection; a contradicted population cites the
 delta row attribution measured, and measures nothing of its own. A command that takes no declarations refuses a payload
 carrying them rather than dropping them. The full shape, the refusals and
 what each field renders into:
-[`skills/transform/references/declarations.md`](https://github.com/exmergo/dex/blob/v1.16.1/skills/transform/references/declarations.md).
+[`skills/transform/references/declarations.md`](https://github.com/exmergo/dex/blob/v1.16.2/skills/transform/references/declarations.md).
 
 `kind` is one of `model_sql`, `schema_yml`, `semantic_yml` (optional on
 `semantic define|update`, which imply `semantic_yml`), `packages_yml`,
@@ -944,8 +962,19 @@ default, or a filter or operator after it is refused. A key naming a location
   in `warnings` names the count so a caller reading warnings alone still learns
   they are there. A build that failed partway still reports the build-status
   half, which is when "which node failed, and what did it take down with it" is
-  worth most; row population is suppressed there, because a half-built dev
-  target is a mix of this run's output and the last one's.
+  worth most; row population and the declared facts are suppressed there,
+  because a half-built dev target is a mix of this run's output and the last
+  one's.
+
+  **Declared facts.** The sweep checks what each built model's declaration
+  says (#496): `unit_out_of_range`, `additivity_contradicted` and
+  `population_contradicted`, exactly as `maintain verify` reports them, plus a
+  declared grain no `unique` test in the build already checks (a composite
+  grain always), reported as `grain_broken` with `source: declaration`. A
+  single-column declared grain renders as a `unique` test, which the build
+  itself runs, and `null_rule: never` renders as `not_null`, so neither is
+  checked twice. Every class that did not run is named in `suppressed`
+  (`grain`, `unit`, `additivity`, `population`).
 
   `no_relation` is never reported from a build: dbt's run results are
   authoritative for the nodes it just ran, and a node it reports as `success`
@@ -954,7 +983,9 @@ default, or a filter or operator after it is refused. A key naming a location
   **Cost.** The row counts a verdict needs are priced during the build's own
   pricing pass, off the manifest the free `dbt compile` wrote, and folded into
   the same estimate under a `(row counts)` entry in the per-table breakdown, so
-  one `--budget` covers both phases. Only relations the warehouse keeps no row
+  one `--budget` covers both phases. The declared-fact statements are priced the
+  same way under `(declared facts)`, and gated after the build as their own
+  phase of the same reservation, never as a second budget. Only relations the warehouse keeps no row
   count for cost anything, which is any view, and a view is dbt's default
   materialization; a table's count is free metadata. On a connector with no
   cost gate every count is made exact instead, because doing so bills nothing.
@@ -1101,6 +1132,23 @@ name the objects, and `snapshot` reports `column_detail_count` beside
 warn when the baseline was pinned from a cache older than
 `profile_freshness_hours`, judged on the capture time recorded in the baseline
 rather than on which file was written last, so re-pinning cannot silence it.
+
+**A changed declaration is drift, even with the SQL untouched.** A model's
+declaration ([#491](https://github.com/exmergo/dex/issues/491)) records which
+rows belong, what one row is and how each measure adds up, so changing it
+changes what the model's numbers mean. `maintain snapshot` fingerprints it per
+model and per column, one hash per field over a canonical form, so reflowing a
+description or reordering a grain is not a change and no declared value lands
+in `.dex/`. `maintain semantic` and `maintain check` report
+`declaration_changed` (one field, with `data.change` of `changed`, `added` or
+`removed`), `declaration_added` and `declaration_removed` on the semantic axis.
+A change to the population, grain, additivity, unit or aggregation is `high`,
+a description `low`. The comparison reads the repository and the snapshot
+only, so it is free on every connector. `data.declaration_drift.checked` says
+whether it ran: a baseline pinned before declarations were fingerprinted, or a
+project format that does not read them, is `false` with a `reason` and a
+warning, never an empty, clean-looking result. `maintain snapshot
+--project-only` baselines the declarations without re-measuring the warehouse.
 
 **`explore semantic` queries the semantic layer; `transform` and the `semantic`
 group author it, and `maintain semantic` detects drift in it.** Three backends
@@ -1661,4 +1709,4 @@ before the engine logic was built, and the subcommands fill in against this
 fixed boundary. Exploration, authoring, and maintenance are live today; the Viz
 preview is the last stub, pending the Viz integration.
 
-Source: [`references/command-contract.md`](https://github.com/exmergo/dex/blob/v1.16.1/references/command-contract.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/command-contract.md)). This page is generated; change the source, not the site.
+Source: [`references/command-contract.md`](https://github.com/exmergo/dex/blob/v1.16.2/references/command-contract.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/command-contract.md)). This page is generated; change the source, not the site.

@@ -49,7 +49,7 @@ dex config set [<key value> ...]
 Propose removing keys, including ones dex does not read, as a diff, and write it with `--confirm`. Free.
 
 ```text
-dex config unset [<key> ...]
+dex config unset [--duplicate] [<key> ...]
 ```
 
 **Arguments**
@@ -58,6 +58,12 @@ dex config unset [<key> ...]
 | --- | --- | --- |
 | `[<key> ...]` | setting or block to remove, including keys dex does not read |  |
 
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--duplicate` | remove only ignored duplicate occurrences of key(s) |  |
+
 Every command here also accepts the [global options](/dex/cli/overview#global-options).
 
-Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.16.1/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.
+Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.16.2/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.
