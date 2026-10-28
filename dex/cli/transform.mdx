@@ -211,6 +211,29 @@ dex transform place [--targets MODELS] [--expr SQL] [--explain] [<column>]
 | `--expr SQL` | SQL expression that computes the column |  |
 | `--explain` | return the reasoning without storing a plan |  |
 
+## dex transform declare
+
+Store one plan proposing the measured facts (grain, keys, joins, running totals) each selected model does not yet declare, plus any intent the `--edits-file` declarations supply. Capped at 25 models; every skipped model is named. Repo-only and free.
+
+```text
+dex transform declare [--edits-file FILE] [--limit N] [--intent INTENT]
+    [<model> ...]
+```
+
+**Arguments**
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `[<model> ...]` | model to declare (default: every model in the project) |  |
+
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--edits-file FILE` | payload whose `declarations` supply intent for the plan |  |
+| `--limit N` | propose at most N models (can only lower the cap of 25) |  |
+| `--intent INTENT` | one line saying what the plan is for |  |
+
 ## dex transform test
 
 `--scaffold` plans a unit_tests skeleton for a model. `--mutate` plants one defect at a time and reports which ones no test caught; `--downstream` also counts the tests of the models that read it. Mutation runs dbt on the dev target and is billed on metered connectors.
@@ -298,4 +321,4 @@ dex transform preflight [--target TARGET]
 
 Every command here also accepts the [global options](/dex/cli/overview#global-options).
 
-Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.16.3/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.
+Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.16.4/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.
