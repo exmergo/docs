@@ -111,7 +111,7 @@ dex maintain reconcile [{schema,volume,grain,semantic}]
 Check build status, column contracts, row population, grain and join contracts against the built relations. Mostly free metadata; view row counts and join probes are offered with an estimate.
 
 ```text
-dex maintain verify [<object> ...]
+dex maintain verify [--target TARGET] [<object> ...]
 ```
 
 **Arguments**
@@ -120,6 +120,12 @@ dex maintain verify [<object> ...]
 | --- | --- | --- |
 | `[<object> ...]` | dbt selector to verify (default: the whole project) |  |
 
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--target TARGET` | dbt dev target to verify against; prod-looking targets are refused |  |
+
 Every command here also accepts the [global options](/dex/cli/overview#global-options).
 
-Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.16.4/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.
+Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.16.5/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.

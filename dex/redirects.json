@@ -88,6 +88,14 @@
     "destination": "/dex/semantic-layers/ossie"
   },
   {
+    "source": "/dex/references/cube-compatibility",
+    "destination": "/dex/semantic-layers/cube"
+  },
+  {
+    "source": "/dex/references/cube-compatibility.md",
+    "destination": "/dex/semantic-layers/cube"
+  },
+  {
     "source": "/dex/references/ossie-walkthrough",
     "destination": "/dex/guides/ossie-semantic-layer"
   },
