@@ -29,7 +29,8 @@ logic.
   rendered locally (any mode but `list`, without `--api`), `[semantic]`, and
   `[slayer]` where `semantic.vendor` is `slayer`, in place of `[semantic]`, since
   SLayer renders its own `query` and `values`. `[cube]` follows the same
-  `semantic.vendor` read for the same commands where the vendor is `cube`, and a
+  `semantic.vendor` read for the same commands where the vendor is `cube`, is
+  always taken by `semantic cube`, and a
   Cube `query` or `values` never takes `[semantic]` either. A repo that runs
   neither resolves neither scikit-learn nor MetricFlow.
 - That environment is uv's own, and `--no-project` is what keeps it so. Without it
@@ -376,6 +377,13 @@ dex semantic slayer define|update|plan
                                      files in semantic.slayer.models, validated as one prospective
                                      set with SLayer's own model, and applied atomically with
                                      transform apply
+dex semantic cube define|update|plan
+                                  -> Cube model files as whole-file diffs; limited to the plain YAML
+                                     files in semantic.cube.files (JS, globals.py, cube.py/cube.js and
+                                     compiled-only files refused by name), validated as one prospective
+                                     set with dex's port of Cube's model rules, each cube and view
+                                     classified defined, updated or unchanged, and applied atomically
+                                     with transform apply
 dex maintain snapshot [--project-only]
                                   -> capture/refresh the known-good baseline in .dex/snapshot.json;
                                      --project-only re-fingerprints only project layers and carries the
@@ -390,21 +398,29 @@ dex maintain schema [<objects>]   -> structural drift: columns/tables added, dro
                                      nullability; dangling sources; a model added, removed, or
                                      content-changed since the baseline (metadata, free everywhere);
                                      under semantic.vendor: slayer, the models held to the warehouse
-                                     by SLayer's own validate-models rules on dex's metadata
+                                     by SLayer's own validate-models rules on dex's metadata; under
+                                     semantic.vendor: cube, the cubes and views held to it by dex's
+                                     own rules (declared_column_missing|type_conflict|
+                                     relation_missing|dependency_dropped)
 dex maintain volume [<objects>]   -> freshness drift: row counts that collapsed, emptied, or spiked (free)
 dex maintain grain [<objects>]    -> cardinality/identity drift: lost key uniqueness, changed grain, join
                                      fanout, the grains the project declares re-verified, and declared
-                                     join arity measured (join_cardinality_exceeded)
+                                     join arity (SLayer cardinality, Cube relationship) measured
+                                     (join_cardinality_exceeded)
                                      (aggregates; gated by --confirm --budget on billed connectors)
 dex maintain semantic [<objects>] -> definition drift and dangling refs (free) + declaration drift
                                      (declaration_added|removed|changed naming the model, column and
                                      field, population/grain/additivity/unit ranked above a description;
                                      free; data.declaration_drift says whether it was checked) +
-                                     categorical dimension cardinality change (a scan; gated on billed
-                                     connectors)
+                                     categorical dimension cardinality change on any model naming its
+                                     table (a scan; gated on billed connectors); a compiled-only Cube
+                                     definition is compared by content alone (compiled_only_changed)
 dex maintain reconcile [<class>]  -> propose the edits that reconcile detected drift, as a stored plan
                                      of diffs tagged mechanical/advisory (applied with transform apply);
-                                     a SLayer layer's own removals as a second plan, semantic_plan_id
+                                     a SLayer or Cube layer's own removals as a second plan,
+                                     semantic_plan_id;
+                                     cardinality advisories distinguish expansion from contraction
+                                     using available counts, and flag approximate counts as uncertain
 dex maintain verify [<selector>]  -> is the project correct right now, no .dex/snapshot.json baseline
                                      required (unlike every subcommand above). Build status:
                                      failed/skipped build nodes (naming the failed cause, walking back
@@ -493,20 +509,31 @@ measures `<column>_<agg>`), validated by `semantic slayer`'s own checks and read
 back through its catalog, then stored as a second plan on the SLayer layer
 (`plan_id`, beside the dbt plan; apply both) where its path is already under
 `semantic.slayer.models`, and proposed with the `dex config set` that adopts it
-otherwise. Under `ossie` and `cube`, whose layers do not implement the hook yet,
-nothing is derived and a warning says so. In every layer a population is carried
-as metadata (`config.meta.dex` or `meta.dex`, and one sentence in the description)
+otherwise. Under `cube` it is a Cube model file of its own, `<dir>/<mart>.yml`
+beside the configured files (`primary_key` on the grain dimensions, other roles as
+dimensions, declared aggregations as measures named after the column,
+`many_to_one` joins from foreign keys), validated by `semantic cube`'s own checks
+and read back through its catalog, and included or proposed on the same terms
+against `semantic.cube.files`. Under `ossie` it is a dataset (a field per declared
+column, `primary_key` on every grain field, declared aggregations as dataset-scoped
+metrics `<column>_<agg>`, a relationship from each foreign key to the parent's
+field) appended to the configured document holding the datasets its foreign keys
+reference, every other byte kept, and stored as a second plan (`plan_id`); where
+no configured document can hold it, it is proposed as a document of its own. In
+every layer a population is carried as metadata (`config.meta.dex`, `meta.dex`, or
+Ossie's `ai_context`, and one sentence in the description)
 and never as a filter, since the mart's SQL already enforces it; per model,
 `carried` and `not_carried` account for every declared field.
-`semantic slayer define|update|plan` take `declarations` too, annotating a model
-the payload or the layer defines; `semantic ossie` refuses them by name. A command that takes no declarations refuses a payload
+`semantic slayer define|update|plan`, `semantic cube define|update|plan` and
+`semantic ossie define|update|plan` take `declarations` too, annotating a model,
+cube or dataset the payload or the layer defines. A command that takes no declarations refuses a payload
 carrying them rather than dropping them. `transform declare [<model>...]` takes the
 same payload for models that already exist: it proposes only the measured facts
 each selected model does not yet declare, lays the supplied `declarations` over
 them field by field, and stores the lot as one capped plan, naming every model it
 skipped and why. The full shape, the refusals and
 what each field renders into:
-[`skills/transform/references/declarations.md`](https://github.com/exmergo/dex/blob/v1.16.5/skills/transform/references/declarations.md).
+[`skills/transform/references/declarations.md`](https://github.com/exmergo/dex/blob/v1.16.6/skills/transform/references/declarations.md).
 
 `kind` is one of `model_sql`, `schema_yml`, `semantic_yml` (optional on
 `semantic define|update`, which imply `semantic_yml`), `packages_yml`,
@@ -987,6 +1014,25 @@ default, or a filter or operator after it is refused. A key naming a location
   declaration dex cannot check by name (a git URL names a repository, and dbt
   installs under the package's own name) is reported separately rather than named
   on a guess.
+- **`transform build` rebuilds a seed whose CSV header changed.** dbt loads a
+  seed into the table it already built, so a header that gained or lost a
+  column fails to load and every model reading the seed is skipped behind it,
+  and one that reordered its columns loads each value under the wrong name
+  (dbt-duckdb loads by position). On DuckDB, before the build, dex asks
+  `dbt ls` which seeds the build selects (dex does not evaluate the selector,
+  and a default selector in `selectors.yml` counts), compares each one's header
+  with the columns of its table in the DuckDB file the dev target writes, and
+  runs `dbt seed --full-refresh` for each seed that differs. `dbt ls` parses
+  afresh for the target, so neither a cleaned target directory nor a manifest
+  left by another target decides which table a seed loads into; it adds one dbt
+  invocation to every DuckDB build whose dev database file already exists (a
+  file that does not exist yet holds no seed table to compare).
+  `data.full_refresh` names the rebuilt seeds (`seeds`, `success`) and a line
+  in `warnings` says why; a refresh that fails stops the build, with
+  `dbt seed --full-refresh failed: ...` as `errors[0]`. A dev target dex cannot
+  read is named in `warnings` and the build runs as it did before the check
+  existed. Billed connectors do not run the check: the refresh would spend
+  warehouse time outside the spend the build settles.
 - `transform build --verify` runs the `maintain verify` sweep over the nodes
   this build touched and reports it under `data.verification`, in one envelope
   with the build result. Opt-in on every connector, free ones included.
@@ -1131,7 +1177,9 @@ default, or a filter or operator after it is refused. A key naming a location
   Its namespace guard is the semantic-model namespace across every configured
   document: `define` rejects existing names, `update` rejects missing names,
   and `plan` reports a mixed change under `defined` and `updated`. Each edit is
-  a complete configured `.ossie.yaml`, `.ossie.yml`, or `.ossie.json` document;
+  a complete configured `.ossie.yaml`, `.ossie.yml`, or `.ossie.json` document,
+  one semantic model flat at its root (the earlier wrapped `semantic_model` list
+  is refused with the migration named);
   Dex overlays all edits in memory and validates the prospective configured set
   before storing anything. It writes the accepted content byte-for-byte, with
   no YAML/JSON reformatting, and never changes a configured document absent from
@@ -1148,6 +1196,22 @@ default, or a filter or operator after it is refused. A key naming a location
   refusal names the file, the element, and for an unknown key the pinned
   release. Apply writes the authored bytes, all files or none, and a file
   SLayer's own storage rewrote after planning is a conflict that says so.
+- `semantic cube define|update|plan` is the same route for Cube model files.
+  Each edit is one whole plain-YAML file keyed as `semantic.cube.files` names
+  it, relative to the repository root. A path off that list, a JavaScript
+  model, `globals.py`, `cube.py`/`cube.js`, a configured file that is
+  compiled-only on disk, and authored content that is compiled-only (Jinja, or
+  `extends`) are refused by name, a compiled-only one with the reason the
+  catalog's `compiled_only` gives. The prospective set is validated with the
+  reader's own port of Cube's model rules (structure, unique names across cubes
+  and views, join targets and `{member}` references resolving, view
+  `join_path`s following declared joins, one join between a pair of cubes),
+  and a key Cube does not declare is refused in a file the plan writes rather
+  than warned about. A summing or counting cube on the one side of a join with
+  no `primary_key` is a `fan_out` warning. Each cube and view an edited file
+  carries is reported `defined`, `updated` or `unchanged`. Apply writes the
+  authored bytes, all files or none, and a file changed after planning is a
+  conflict.
 
 
 Skill-to-subcommand mapping: `explore` fronts `connect`/`explore`; `transform`
@@ -1224,7 +1288,11 @@ way" would be a claim about the layer where the truth is that this backend was
 never told. The documents are named in `semantic.ossie.files`, including for an
 Ossie-only repository. They are confined to the repository, and selecting Ossie
 without the `[ossie]` extra refuses and names it. dex pins the Ossie schema by
-content hash rather than by the version string the document carries. See
+content hash rather than by the version string the document carries, and records
+that hash as the layer's `format_version` in a snapshot, so a moved pin is one
+`semantic_format_changed` finding rather than a layer of changed definitions. Keys
+and relationship columns name fields and reach the warehouse through each
+field's expression. A dataset-scoped metric is listed as `dataset.metric`. See
 `references/semantic-layer.md`, and `references/ossie-compatibility.md` for what
 dex accepts, checks, links, and declines to claim under that pin.
 
@@ -1270,10 +1338,22 @@ measure is a `ratio` or `derived` metric over the measures it references. A
 metric is groupable by its cube's dimensions and those its declared joins reach,
 so `--for-dimension` answers. Entities are declared `unavailable`: `primary_key`
 and joins reach `explore` through the declaration channel instead, at confidence
-1.0. `query` refuses by name, since Cube renders a query only inside a Cube
-server, and `values` refuses the same way after its PII gate has run. `maintain`
-fingerprints the layer under `vendor: cube`, and the layer-neutral definition
-drift reads it. Selecting the vendor without the `[cube]` extra (the dialect
+1.0. `query` and `values` are governed: Cube has no SQL renderer outside a Cube
+server, so dex asks the server at `semantic.cube.url` to render over `/v1/sql`
+(planning, never executing), holds every member the query names to the server's
+`/v1/meta` first, refuses a plan from a pre-aggregation, of more than one
+statement, or rendered for another warehouse, binds Cube's parameters as literals
+of dex's dialect, and runs the statement through the governed spine in a UTC
+session, `execution: dex` (see
+[Querying: Cube renders, Dex executes](/dex/semantic-layers/cube#querying-cube-renders-dex-executes)). `maintain`
+runs every axis on the layer without starting a Cube server: the baseline records
+`vendor: cube` and each compiled-only definition by its content (a change is
+`compiled_only_changed`, never compared structurally, and a warning says so on
+every run), `primary_key`s and each join's `relationship` are measured on the
+grain axis, categorical dimensions are re-counted on the semantic axis, and the
+schema axis holds each member's columns and type to dex's own metadata, whose
+removals `maintain reconcile` plans through the `semantic cube update` route. `semantic cube define|update|plan` authors the files, and a
+declared dbt mart derives a cube of its own (see `transform plan` above). Selecting the vendor without the `[cube]` extra (the dialect
 engine) refuses and names it. See `references/semantic-layer.md`.
 
 `list` costs no warehouse query on either backend, and neither does the reverse
@@ -1828,4 +1908,4 @@ before the engine logic was built, and the subcommands fill in against this
 fixed boundary. Exploration, authoring, and maintenance are live today; the Viz
 preview is the last stub, pending the Viz integration.
 
-Source: [`references/command-contract.md`](https://github.com/exmergo/dex/blob/v1.16.5/references/command-contract.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/command-contract.md)). This page is generated; change the source, not the site.
+Source: [`references/command-contract.md`](https://github.com/exmergo/dex/blob/v1.16.6/references/command-contract.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/command-contract.md)). This page is generated; change the source, not the site.

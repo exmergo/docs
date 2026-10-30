@@ -119,6 +119,27 @@ dex semantic slayer [--edits-file FILE] [{define,update,plan}] [<intent>]
 | --- | --- | --- |
 | `--edits-file FILE` | whole-document edits payload as JSON; '-' reads stdin |  |
 
+## dex semantic cube
+
+Validate whole plain-YAML Cube model files at the paths semantic.cube.files configures, with dex's port of Cube's model rules, then store a plan. Needs the [cube] extra. No Cube server, no warehouse. Repo-only.
+
+```text
+dex semantic cube [--edits-file FILE] [{define,update,plan}] [<intent>]
+```
+
+**Arguments**
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `[{define,update,plan}]` | define new documents, update existing ones, or plan a mix |  |
+| `[<intent>]` | one line saying what the change is for |  |
+
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--edits-file FILE` | whole-document edits payload as JSON; '-' reads stdin |  |
+
 Every command here also accepts the [global options](/dex/cli/overview#global-options).
 
-Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.16.5/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.
+Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.16.6/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.
