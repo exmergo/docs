@@ -8,9 +8,24 @@ twitter:title: dex explore · Exmergo Dex
 
 make sense of a warehouse: rank objects, profile columns, infer joins
 
+Choose a command, then expand its usage and options. Every command here also accepts the [global options](/dex/cli/overview#global-options).
+
+| Command | What it does |
+| --- | --- |
+| [`dex explore inventory`](#dex-explore-inventory) | list warehouse objects with counts and sizes, no rows |
+| [`dex explore profile`](#dex-explore-profile) | profile columns: grain, keys, PII flags, data quality |
+| [`dex explore relationships`](#dex-explore-relationships) | infer how tables join, optionally verified |
+| [`dex explore map`](#dex-explore-map) | rank, profile and relate a warehouse into .dex/ |
+| [`dex explore diagram`](#dex-explore-diagram) | draw the cached map as a Mermaid ER diagram |
+| [`dex explore query`](#dex-explore-query) | run guarded SELECTs through the query firewall |
+| [`dex explore cluster`](#dex-explore-cluster) | k-means over a sampled scan of numeric columns |
+| [`dex explore semantic`](#dex-explore-semantic) | list, read or query the semantic layer |
+
 ## dex explore inventory
 
 Summarize the objects in scope from metadata. `--rank` orders them by what matters and caps the list. Free metadata on every connector.
+
+<Accordion title="Usage and options for dex explore inventory">
 
 ```text
 dex explore inventory [--rank] [--limit N] [--all]
@@ -24,13 +39,17 @@ dex explore inventory [--rank] [--limit N] [--all]
 | `--limit N` | widen the ranked list to N objects (with `--rank`) |  |
 | `--all` | lift the ranked list's cap (with `--rank`) |  |
 
+</Accordion>
+
 ## dex explore profile
 
 Profile the named objects from aggregates, never rows: candidate keys, grain, PII flags and data-quality findings. Billed on metered connectors, so it quotes the cost first.
 
+<Accordion title="Usage and options for dex explore profile">
+
 ```text
-dex explore profile [--check-cumulative] [--columns {all}] [--refresh]
-    [--use-project] <object> [<object> ...]
+dex explore profile [--check-cumulative] [--target TARGET] [--columns {all}]
+    [--refresh] [--use-project] <object> [<object> ...]
 ```
 
 **Arguments**
@@ -44,13 +63,18 @@ dex explore profile [--check-cumulative] [--columns {all}] [--refresh]
 | Option | Description | Default |
 | --- | --- | --- |
 | `--check-cumulative` | detect running totals and snapshots with a window scan (billed) |  |
+| `--target TARGET` | also read this dbt dev target's namespace; prod-looking targets are refused |  |
 | `--columns {all}` | return every column, not only those with a finding |  |
 | `--refresh` | re-profile even when the cached profile is fresh |  |
 | `--use-project` | fold in the project's declared joins, grain and semantics |  |
 
+</Accordion>
+
 ## dex explore relationships
 
 Infer join edges with confidences. `--verify` measures each join with an overlap probe, which is billed on metered connectors.
+
+<Accordion title="Usage and options for dex explore relationships">
 
 ```text
 dex explore relationships [--verify] [--infer-by-overlap] [--refresh]
@@ -67,9 +91,13 @@ dex explore relationships [--verify] [--infer-by-overlap] [--refresh]
 | `--use-project` | fold in the project's declared joins, grain and semantics |  |
 | `--use-hosted-semantic-layer` | also read the configured hosted semantic layer's catalog |  |
 
+</Accordion>
+
 ## dex explore map
 
 Build or refresh the draft map in .dex/: the top-ranked objects with grain, keys and PII flags, plus the join edges. Billed on metered connectors, so it quotes the cost first.
+
+<Accordion title="Usage and options for dex explore map">
 
 ```text
 dex explore map [--full] [--detail] [--verify] [--infer-by-overlap]
@@ -88,9 +116,13 @@ dex explore map [--full] [--detail] [--verify] [--infer-by-overlap]
 | `--use-project` | fold in the project's declared joins, grain and semantics |  |
 | `--use-hosted-semantic-layer` | also read the configured hosted semantic layer's catalog |  |
 
+</Accordion>
+
 ## dex explore diagram
 
 Serialize the .dex/ map as a Mermaid erDiagram. Free and connectionless: it reads only the cache.
+
+<Accordion title="Usage and options for dex explore diagram">
 
 ```text
 dex explore diagram [--full]
@@ -102,9 +134,13 @@ dex explore diagram [--full]
 | --- | --- | --- |
 | `--full` | draw every eligible object and column |  |
 
+</Accordion>
+
 ## dex explore query
 
 Run one or more SELECT statements through the query firewall, which returns values only from profiled columns cleared of PII. Billed on metered connectors.
+
+<Accordion title="Usage and options for dex explore query">
 
 ```text
 dex explore query [--sql-file FILE] [--across DATASETS] [--no-auto-profile]
@@ -125,9 +161,13 @@ dex explore query [--sql-file FILE] [--across DATASETS] [--no-auto-profile]
 | `--across DATASETS` | run each statement once per dataset, substituted for \{ds\} |  |
 | `--no-auto-profile` | refuse unprofiled objects instead of profiling them first |  |
 
+</Accordion>
+
 ## dex explore cluster
 
 Cluster one object's numeric columns from a bounded sample and return sizes, centroids and silhouette, never rows. Needs the [cluster] extra; billed on metered connectors.
+
+<Accordion title="Usage and options for dex explore cluster">
 
 ```text
 dex explore cluster [--no-auto-profile] [--features COLUMNS] [--clusters N]
@@ -148,9 +188,13 @@ dex explore cluster [--no-auto-profile] [--features COLUMNS] [--clusters N]
 | `--features COLUMNS` | numeric columns to cluster on, comma-separated |  |
 | `-k`, `--clusters N` | number of clusters (chosen automatically when omitted) |  |
 
+</Accordion>
+
 ## dex explore semantic
 
 Discover the semantic layer's metrics, dimensions and entities (list), read one dimension's values (values), or run a governed metric query (query). Listing is free; values and query run SQL.
+
+<Accordion title="Usage and options for dex explore semantic">
 
 ```text
 dex explore semantic [--metric METRICS] [--for-dimension DIMENSIONS]
@@ -182,6 +226,8 @@ dex explore semantic [--metric METRICS] [--for-dimension DIMENSIONS]
 | `--local` | dex renders and runs the SQL, under the cost guard |  |
 | `--api` | dbt Cloud runs the query; no cost guard applies |  |
 
+</Accordion>
+
 Every command here also accepts the [global options](/dex/cli/overview#global-options).
 
-Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.16.6/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.
+Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.17.0/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.

@@ -27,9 +27,9 @@ No warehouse yet: `dex demo` seeds a local one, no credentials needed. Have one 
 | [`dex transform`](/dex/cli/transform) | author and refactor dbt models, tests, and the semantic layer |
 | [`dex semantic`](/dex/cli/semantic) | define dbt or native semantic layers as reviewable diffs |
 | [`dex maintain`](/dex/cli/maintain) | detect drift against the last snapshot and propose the fix |
-| [`dex viz`](/dex/cli/viz) | preview the semantic layer (not yet implemented) |
 | [`dex config`](/dex/cli/config) | read, check and change .dex/config.yml, as reviewable diffs |
 | [`dex demo`](/dex/cli/demo) | create a seeded local DuckDB warehouse to try dex against (no credentials, no network) |
+| [`dex procedure`](/dex/cli/procedure) | print the agent procedure, or the block to paste into CLAUDE.md / AGENTS.md (no connection) |
 
 ## Global options
 
@@ -51,4 +51,4 @@ Every command accepts these. The last column says where on the command line each
 | `--cache-backend NAME` | where .dex/ state is kept for this run; must precede the group | before the group only |
 | `--project-format NAME` | transformation project format for this run; must precede the group | before the group only |
 
-Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.16.6/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.
+Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.17.0/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.

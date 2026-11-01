@@ -8,9 +8,24 @@ twitter:title: dex maintain · Exmergo Dex
 
 detect drift against the last snapshot and propose the fix
 
+Choose a command, then expand its usage and options. Every command here also accepts the [global options](/dex/cli/overview#global-options).
+
+| Command | What it does |
+| --- | --- |
+| [`dex maintain snapshot`](#dex-maintain-snapshot) | capture the known-good baseline in .dex/snapshot.json |
+| [`dex maintain check`](#dex-maintain-check) | sweep every drift axis against the snapshot |
+| [`dex maintain schema`](#dex-maintain-schema) | detect added, dropped, retyped or renamed columns |
+| [`dex maintain volume`](#dex-maintain-volume) | detect row counts that collapsed, emptied or spiked |
+| [`dex maintain grain`](#dex-maintain-grain) | detect lost key uniqueness and changed grain |
+| [`dex maintain semantic`](#dex-maintain-semantic) | detect semantic definition drift and dangling references |
+| [`dex maintain reconcile`](#dex-maintain-reconcile) | propose the edits that reconcile detected drift |
+| [`dex maintain verify`](#dex-maintain-verify) | check the project is correct now, with no baseline |
+
 ## dex maintain snapshot
 
 Pin the current map and fingerprint the project layers as the baseline drift is measured against. `--project-only` opens no connection.
+
+<Accordion title="Usage and options for dex maintain snapshot">
 
 ```text
 dex maintain snapshot [--project-only]
@@ -22,9 +37,13 @@ dex maintain snapshot [--project-only]
 | --- | --- | --- |
 | `--project-only` | refingerprint only the project layers; opens no connection |  |
 
+</Accordion>
+
 ## dex maintain check
 
 Run every drift axis against the snapshot and rank the findings. The free axes always run; the scanning axes are offered with an estimate.
+
+<Accordion title="Usage and options for dex maintain check">
 
 ```text
 dex maintain check [<object> ...]
@@ -36,9 +55,13 @@ dex maintain check [<object> ...]
 | --- | --- | --- |
 | `[<object> ...]` | object to check (default: the whole project) |  |
 
+</Accordion>
+
 ## dex maintain schema
 
 Compare structure against the snapshot: columns, tables, nullability, dangling sources and changed models. Free metadata.
+
+<Accordion title="Usage and options for dex maintain schema">
 
 ```text
 dex maintain schema [<object> ...]
@@ -50,9 +73,13 @@ dex maintain schema [<object> ...]
 | --- | --- | --- |
 | `[<object> ...]` | object to check (default: the whole project) |  |
 
+</Accordion>
+
 ## dex maintain volume
 
 Compare row counts against the snapshot from free metadata. Objects with no maintained count, such as views, are named as not compared.
+
+<Accordion title="Usage and options for dex maintain volume">
 
 ```text
 dex maintain volume [<object> ...]
@@ -64,9 +91,13 @@ dex maintain volume [<object> ...]
 | --- | --- | --- |
 | `[<object> ...]` | object to check (default: the whole project) |  |
 
+</Accordion>
+
 ## dex maintain grain
 
 Re-measure key uniqueness, grain and join fanout, plus declared grains. Scans the data, so it is billed on metered connectors.
+
+<Accordion title="Usage and options for dex maintain grain">
 
 ```text
 dex maintain grain [<object> ...]
@@ -78,9 +109,13 @@ dex maintain grain [<object> ...]
 | --- | --- | --- |
 | `[<object> ...]` | object to check (default: the whole project) |  |
 
+</Accordion>
+
 ## dex maintain semantic
 
 Report changed, added and removed semantic definitions and references that no longer resolve, for free. Dimension cardinality change is a scan, offered with an estimate.
+
+<Accordion title="Usage and options for dex maintain semantic">
 
 ```text
 dex maintain semantic [<object> ...]
@@ -92,9 +127,13 @@ dex maintain semantic [<object> ...]
 | --- | --- | --- |
 | `[<object> ...]` | object to check (default: the whole project) |  |
 
+</Accordion>
+
 ## dex maintain reconcile
 
 Store the reconciling edits as a plan of diffs tagged mechanical or advisory. Never applied here; use transform apply. Repo-only.
+
+<Accordion title="Usage and options for dex maintain reconcile">
 
 ```text
 dex maintain reconcile [{schema,volume,grain,semantic}]
@@ -106,9 +145,13 @@ dex maintain reconcile [{schema,volume,grain,semantic}]
 | --- | --- | --- |
 | `[{schema,volume,grain,semantic}]` | reconcile only this drift class (default: all) |  |
 
+</Accordion>
+
 ## dex maintain verify
 
 Check build status, column contracts, row population, grain and join contracts against the built relations. Mostly free metadata; view row counts and join probes are offered with an estimate.
+
+<Accordion title="Usage and options for dex maintain verify">
 
 ```text
 dex maintain verify [--target TARGET] [<object> ...]
@@ -126,6 +169,8 @@ dex maintain verify [--target TARGET] [<object> ...]
 | --- | --- | --- |
 | `--target TARGET` | dbt dev target to verify against; prod-looking targets are refused |  |
 
+</Accordion>
+
 Every command here also accepts the [global options](/dex/cli/overview#global-options).
 
-Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.16.6/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.
+Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.17.0/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.

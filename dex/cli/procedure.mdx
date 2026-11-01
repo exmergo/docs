@@ -1,0 +1,24 @@
+---
+title: dex procedure
+sidebarTitle: procedure
+description: 'Reference for dex procedure: print the agent procedure every dex skill carries, the block to paste into CLAUDE.md or AGENTS.md, and a stale check.'
+og:title: dex procedure · Exmergo Dex
+twitter:title: dex procedure · Exmergo Dex
+---
+
+print the agent procedure, or the block to paste into CLAUDE.md / AGENTS.md (no connection)
+
+```text
+dex procedure [--block] [--check FILE]
+```
+
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--block` | also return data.block, ready to paste into CLAUDE.md or AGENTS.md |  |
+| `--check FILE` | report whether FILE carries the current procedure (repeatable) |  |
+
+Every command here also accepts the [global options](/dex/cli/overview#global-options).
+
+Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.17.0/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.

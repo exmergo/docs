@@ -1,10 +1,13 @@
 ---
 title: Querying the semantic layer
-sidebarTitle: Overview
+sidebarTitle: Catalog and queries
 description: 'Query a semantic layer with dex explore semantic: list metrics, read dimension values, and run governed metric queries on dbt, dbt Cloud, or Apache Ossie.'
 og:title: Querying the semantic layer · Exmergo Dex
 twitter:title: Querying the semantic layer · Exmergo Dex
 ---
+
+Start with [Use a semantic layer](https://docs.exmergo.com/dex/guides/semantic-layer) for the workflow.
+This reference covers catalog fields, backend configuration, and query support.
 
 dex can author a semantic layer (`transform` / `semantic define|update` for dbt,
 `semantic ossie define|update` for native Apache Ossie documents, `semantic slayer
@@ -12,10 +15,9 @@ define|update` for SLayer model files, `semantic cube define|update` for Cube
 model files) and detect drift
 in it (`maintain semantic`). `explore semantic` is the third piece: it *queries*
 the layer, so an agent can discover metrics and, where the layer defines a
-runtime, run governed metric queries. Four layers answer the same commands
-through one abstraction (a local dbt project, a hosted dbt Cloud deployment,
-native Apache Ossie documents, and SLayer model files), and the differences
-between them are load-bearing, so they are spelled out here.
+runtime, run governed metric queries. The catalog covers local dbt projects,
+hosted dbt Cloud deployments, and native Apache Ossie, SLayer, and Cube files.
+Query capabilities differ by backend; the sections below explain those limits.
 
 ## The three commands
 
@@ -922,10 +924,13 @@ note, and never verified or probed:
 `explore map --use-project` marks each source relation with the Ossie semantic
 models sitting on it, and rewrites that mark on every read, so a dataset dropped
 from the layer clears rather than leaving a stale claim. `explore profile
---use-project` lets a declared key override the heuristic grain, noting the
-disagreement rather than replacing it silently, and
-`explore relationships --verify` measures a declared composite as one complete
-tuple. A measurement never revises a declared join's confidence: it stays at the
+--use-project` reports a declared `primary_key` as the grain at either arity,
+noting any disagreement with measurement rather than replacing it silently, and
+never reports a `unique_keys` entry as the grain. It also carries `declaration`,
+read from `ai_context.dex`, with no dbt project needed; SLayer and Cube do the same
+from `meta.dex`. Where a dbt model declares the same relation its declaration is
+reported, and `notes` says so. `explore relationships --verify` measures a declared
+composite as one complete tuple. A measurement never revises a declared join's confidence: it stays at the
 1.0 the document asserts, and a probe that finds the parent largely missing is
 reported as a finding instead.
 
@@ -1068,7 +1073,9 @@ already defines. Nothing opens SLayer storage, a datasource, or a warehouse.
   parent: the joining model is the child, except where `cardinality` is
   `one_to_many`. A single-pair join is also a foreign key, except where
   `cardinality` is `many_to_many`, which says the far side is not a key;
-- `explore map --use-project` marks each relation with the SLayer models on it.
+- `explore map --use-project` marks each relation with the SLayer models on it,
+  and `explore profile|map --use-project` report the primary key as the grain and
+  `meta.dex` as `declaration`.
 
 ### Governed `query` and `values`
 
@@ -1555,4 +1562,19 @@ in `tests/slayer_vendor/test_reader.py`, the catalog one against
 | Extra | `[semantic]` (query); none for `list` | `[semantic-api]` | `[ossie]`; `[sql]` for expression syntax | `[slayer]`, pinned to one SLayer release | `[cube]` (the dialect engine; no Cube package), plus `[semantic-api]` to query |
 | Held to the conformance contract | yes, in both resolver states | yes, against a transport with the API's own asymmetries | yes, plus the four semantic-source contracts | yes, both runtime contracts, against a SLayer rendering of the reference layer | yes, both runtime contracts and the four semantic-source contracts, against a Cube rendering of the reference layer |
 
-Source: [`references/semantic-layer.md`](https://github.com/exmergo/dex/blob/v1.16.6/references/semantic-layer.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/semantic-layer.md)). This page is generated; change the source, not the site.
+## Population prose in local catalogs
+
+Ossie, SLayer and Cube catalogs, and the local dbt catalog
+(`explore semantic list --local`, read from `target/semantic_manifest.json`),
+omit Dex-generated population sentences in every result mode, including sentences
+in existing files and compiled artifacts, with no rebuild. Catalog reads are
+connectionless and cannot establish that population values are safe. The authored
+description prefix is preserved when the generated suffix matches its structured
+`dex.population` metadata. A stale or malformed suffix causes the description to
+be withheld with a value-free note. This happens before catalog search. Files and
+drift fingerprints are unchanged. Use `explore profile|map --use-project` for the
+structured population, screened by the declaration withholding policy. A
+description with no `dex.population` metadata is never edited, even when it says
+`Population:`. The hosted dbt Cloud catalog is not covered.
+
+Source: [`references/semantic-layer.md`](https://github.com/exmergo/dex/blob/v1.17.0/references/semantic-layer.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/semantic-layer.md)). This page is generated; change the source, not the site.

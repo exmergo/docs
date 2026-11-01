@@ -41,6 +41,7 @@ confidence against the blocking threshold.
 | cluster feature selection | presence, any confidence | flagged columns are excluded; naming one is opt-in and mean only |
 | the query firewall | threshold | at or above, projection is refused; below, it runs with a warning |
 | the seed header gate | threshold | a seed column at or above the threshold is refused |
+| declaration population reporting | presence, any confidence | a flagged filter withholds its values and the entire free-text population rule |
 | the semantic request gate | presence, any confidence | a flagged dimension refuses the whole command |
 
 A weak flag therefore still suppresses min and max and still stamps `meta`,
@@ -176,4 +177,4 @@ Profiling's own suppression and the diagram renderer are in
 [`project.md`](/dex/reference/project-formats), and the per-backend request gate is in
 [`semantic-layer.md`](/dex/semantic-layers/overview).
 
-Source: [`references/pii-policy.md`](https://github.com/exmergo/dex/blob/v1.16.6/references/pii-policy.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/pii-policy.md)). This page is generated; change the source, not the site.
+Source: [`references/pii-policy.md`](https://github.com/exmergo/dex/blob/v1.17.0/references/pii-policy.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/pii-policy.md)). This page is generated; change the source, not the site.

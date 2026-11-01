@@ -8,9 +8,34 @@ twitter:title: dex transform · Exmergo Dex
 
 author and refactor dbt models, tests, and the semantic layer
 
+Choose a command, then expand its usage and options. Every command here also accepts the [global options](/dex/cli/overview#global-options).
+
+| Command | What it does |
+| --- | --- |
+| [`dex transform init`](#dex-transform-init) | bootstrap a dbt project skeleton |
+| [`dex transform plan`](#dex-transform-plan) | validate authored dbt edits and store them as a plan |
+| [`dex transform apply`](#dex-transform-apply) | write a stored plan or plan document into the project |
+| [`dex transform build`](#dex-transform-build) | run dbt build against a dev target |
+| [`dex transform deps`](#dex-transform-deps) | install or refresh dbt packages |
+| [`dex transform plans`](#dex-transform-plans) | list stored plans, newest first |
+| [`dex transform macro`](#dex-transform-macro) | list shipped dbt macros, or plan one into the project |
+| [`dex transform references`](#dex-transform-references) | find where names are used across the project |
+| [`dex transform rename`](#dex-transform-rename) | plan every edit a rename needs |
+| [`dex transform remove`](#dex-transform-remove) | plan a definition's removal, refusing while reads remain |
+| [`dex transform place`](#dex-transform-place) | plan where a shared derived column should be defined |
+| [`dex transform declare`](#dex-transform-declare) | propose declarations for models that already exist |
+| [`dex transform test`](#dex-transform-test) | scaffold a unit test, or mutation-test existing tests |
+| [`dex transform compare`](#dex-transform-compare) | compare a model before and after a stored plan |
+| [`dex transform export`](#dex-transform-export) | export a stored plan as a portable, digested document |
+| [`dex transform ground`](#dex-transform-ground) | report what a plan depends on and how complete that is |
+| [`dex transform classify`](#dex-transform-classify) | classify what each edit's content actually contains |
+| [`dex transform preflight`](#dex-transform-preflight) | report what the warehouse will enforce on the next build |
+
 ## dex transform init
 
 Propose a new dbt project as create diffs, for the connector named by `--connector` or .dex/config.yml. Refuses if a dbt project exists. Free.
+
+<Accordion title="Usage and options for dex transform init">
 
 ```text
 dex transform init [--layered-schemas] [--in-place] [<name>]
@@ -29,9 +54,13 @@ dex transform init [--layered-schemas] [--in-place] [<name>]
 | `--layered-schemas` | build each layer into its own schema |  |
 | `--in-place` | scaffold into the current directory instead of &lt;name>/ |  |
 
+</Accordion>
+
 ## dex transform plan
 
 Validate the edits in `--edits-file`, diff them against the project, and store a plan. Nothing is written until transform apply. Repo-only.
+
+<Accordion title="Usage and options for dex transform plan">
 
 ```text
 dex transform plan [--edits-file FILE] [--scaffold TABLE]
@@ -53,9 +82,13 @@ dex transform plan [--edits-file FILE] [--scaffold TABLE]
 | `--attribute-rows` | measure the row-population delta of each change |  |
 | `--no-attribute-rows` | name row-affecting changes without measuring them |  |
 
+</Accordion>
+
 ## dex transform apply
 
 Write a plan's diffs into the project. With no id, applies the latest unapplied plan. A file edited since planning is a conflict, never an overwrite. Repo-only.
+
+<Accordion title="Usage and options for dex transform apply">
 
 ```text
 dex transform apply [--plan-file FILE] [--expect-digest HEX] [<plan-id>]
@@ -74,13 +107,18 @@ dex transform apply [--plan-file FILE] [--expect-digest HEX] [<plan-id>]
 | `--plan-file FILE` | apply an exported plan document instead of a stored plan |  |
 | `--expect-digest HEX` | refuse a plan document whose digest is not this one |  |
 
+</Accordion>
+
 ## dex transform build
 
 Run dbt build on a dev target only, after a free preflight and a cost estimate. It runs only with `--confirm` and `--budget`.
 
+<Accordion title="Usage and options for dex transform build">
+
 ```text
 dex transform build [--target TARGET] [--select SELECTOR] [--verify]
     [--for-plan PLAN-ID] [--for-plan-file FILE] [--no-install-deps]
+    [--full-refresh]
 ```
 
 **Options**
@@ -93,26 +131,39 @@ dex transform build [--target TARGET] [--select SELECTOR] [--verify]
 | `--for-plan PLAN-ID` | report whether the build covered this stored plan |  |
 | `--for-plan-file FILE` | report coverage of an exported plan document |  |
 | `--no-install-deps` | refuse missing dbt packages instead of installing them |  |
+| `--full-refresh` | rebuild selected incremental models after their logic changed |  |
+
+</Accordion>
 
 ## dex transform deps
 
 Run dbt deps inside the project. Repo-confined, with no warehouse spend.
 
+<Accordion title="Usage and options for dex transform deps">
+
 ```text
 dex transform deps
 ```
+
+</Accordion>
 
 ## dex transform plans
 
 List the plans in .dex/plans, pending and applied, newest first. Free.
 
+<Accordion title="Usage and options for dex transform plans">
+
 ```text
 dex transform plans
 ```
 
+</Accordion>
+
 ## dex transform macro
 
 With no name, list the dbt macros dex ships. With a name, plan scaffolding that macro into the project's macro directory. Repo-only.
+
+<Accordion title="Usage and options for dex transform macro">
 
 ```text
 dex transform macro [<macro>]
@@ -124,9 +175,13 @@ dex transform macro [<macro>]
 | --- | --- | --- |
 | `[<macro>]` | shipped macro to scaffold (omit to list them) |  |
 
+</Accordion>
+
 ## dex transform references
 
 Report every use of each name across model SQL, YAML, macros, seeds and installed packages, and say how complete the answer is. With `--usage`, also how other models filter, branch on or aggregate each model.column. Repo-only and free.
+
+<Accordion title="Usage and options for dex transform references">
 
 ```text
 dex transform references [--kind KIND] [--full] [--usage] <name> [<name> ...]
@@ -146,9 +201,13 @@ dex transform references [--kind KIND] [--full] [--usage] <name> [<name> ...]
 | `--full` | lift the cap of 200 occurrences across 50 files |  |
 | `--usage` | also report how other models use each model.column |  |
 
+</Accordion>
+
 ## dex transform rename
 
 Generate one plan renaming a column, var, model, seed, snapshot, macro or source everywhere it is used. Refuses rather than partially applying. Repo-only and free.
+
+<Accordion title="Usage and options for dex transform rename">
 
 ```text
 dex transform rename [--edits-file FILE] <kind> <old> <new>
@@ -168,9 +227,13 @@ dex transform rename [--edits-file FILE] <kind> <old> <new>
 | --- | --- | --- |
 | `--edits-file FILE` | hand-authored edits to store in the same plan |  |
 
+</Accordion>
+
 ## dex transform remove
 
 Plan the removal of a definition and refuse while any read survives, naming each one. Pass the read edits with `--edits-file`. Repo-only.
+
+<Accordion title="Usage and options for dex transform remove">
 
 ```text
 dex transform remove [--edits-file FILE] <kind> <name>
@@ -189,9 +252,13 @@ dex transform remove [--edits-file FILE] <kind> <name>
 | --- | --- | --- |
 | `--edits-file FILE` | hand-authored edits to store in the same plan |  |
 
+</Accordion>
+
 ## dex transform place
 
 Find the lowest common model that can define the column for every target, define it there, and thread it down. `--explain` stores no plan. Repo-only and free.
+
+<Accordion title="Usage and options for dex transform place">
 
 ```text
 dex transform place [--targets MODELS] [--expr SQL] [--explain] [<column>]
@@ -211,9 +278,13 @@ dex transform place [--targets MODELS] [--expr SQL] [--explain] [<column>]
 | `--expr SQL` | SQL expression that computes the column |  |
 | `--explain` | return the reasoning without storing a plan |  |
 
+</Accordion>
+
 ## dex transform declare
 
 Store one plan proposing the measured facts (grain, keys, joins, running totals) each selected model does not yet declare, plus any intent the `--edits-file` declarations supply. Capped at 25 models; every skipped model is named. Repo-only and free.
+
+<Accordion title="Usage and options for dex transform declare">
 
 ```text
 dex transform declare [--edits-file FILE] [--limit N] [--intent INTENT]
@@ -234,9 +305,13 @@ dex transform declare [--edits-file FILE] [--limit N] [--intent INTENT]
 | `--limit N` | propose at most N models (can only lower the cap of 25) |  |
 | `--intent INTENT` | one line saying what the plan is for |  |
 
+</Accordion>
+
 ## dex transform test
 
 `--scaffold` plans a unit_tests skeleton for a model. `--mutate` plants one defect at a time and reports which ones no test caught; `--downstream` also counts the tests of the models that read it. Mutation runs dbt on the dev target and is billed on metered connectors.
+
+<Accordion title="Usage and options for dex transform test">
 
 ```text
 dex transform test [--scaffold MODEL | --mutate MODEL] [--max-mutants N]
@@ -257,9 +332,42 @@ dex transform test [--scaffold MODEL | --mutate MODEL] [--max-mutants N]
 | `--downstream` | also run the tests of the models downstream of it |  |
 | `--no-downstream` | run only the model's own tests |  |
 
+</Accordion>
+
+## dex transform compare
+
+Compile the model with and without the plan, then compare output columns and the exact row multiset on the same dev inputs. Returns counts, never rows. equivalent holds for the compared inputs only. Scans go through `--confirm` `--budget` on metered connectors.
+
+<Accordion title="Usage and options for dex transform compare">
+
+```text
+dex transform compare [--model MODEL] [--map OLD=NEW] [--key COLUMN]
+    [--accept-type COLUMN] [--target TARGET] [<plan_id>]
+```
+
+**Arguments**
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `[<plan_id>]` | stored plan id; defaults to the latest unapplied plan |  |
+
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--model MODEL` | the model whose results should not change |  |
+| `--map OLD=NEW` | a baseline output column the plan renames (repeatable) |  |
+| `--key COLUMN` | baseline key column, repeatable; default: declared grain |  |
+| `--accept-type COLUMN` | baseline column whose type may change in its family |  |
+| `--target TARGET` | dbt dev target to read; prod-looking targets are refused |  |
+
+</Accordion>
+
 ## dex transform export
 
 Print one stored plan as a document another checkout can verify and apply, with a digest over the whole plan. Repo-only and free.
+
+<Accordion title="Usage and options for dex transform export">
 
 ```text
 dex transform export [<plan-id>]
@@ -271,9 +379,13 @@ dex transform export [<plan-id>]
 | --- | --- | --- |
 | `[<plan-id>]` | plan to export (default: latest unapplied) |  |
 
+</Accordion>
+
 ## dex transform ground
 
 List the models, sources, columns and relations a plan reads, what could not be resolved, and a fingerprint of the inputs. Repo-only and free.
+
+<Accordion title="Usage and options for dex transform ground">
 
 ```text
 dex transform ground [<plan-id>]
@@ -285,9 +397,13 @@ dex transform ground [<plan-id>]
 | --- | --- | --- |
 | `[<plan-id>]` | plan to ground (default: latest unapplied) |  |
 
+</Accordion>
+
 ## dex transform classify
 
 Read each edit's content and label it declarative, executable, authority-bearing, data or unknown, naming the signal. Repo-only and free.
+
+<Accordion title="Usage and options for dex transform classify">
 
 ```text
 dex transform classify [--edits-file FILE] [<plan-id>]
@@ -305,9 +421,13 @@ dex transform classify [--edits-file FILE] [<plan-id>]
 | --- | --- | --- |
 | `--edits-file FILE` | classify an edits payload as JSON; '-' reads stdin |  |
 
+</Accordion>
+
 ## dex transform preflight
 
 Read the rendered profiles.yml for provider-side controls on the dev target and say whether any of them binds. Free and connectionless.
+
+<Accordion title="Usage and options for dex transform preflight">
 
 ```text
 dex transform preflight [--target TARGET]
@@ -319,6 +439,8 @@ dex transform preflight [--target TARGET]
 | --- | --- | --- |
 | `--target TARGET` | profiles.yml target to read (default: the configured dev target) |  |
 
+</Accordion>
+
 Every command here also accepts the [global options](/dex/cli/overview#global-options).
 
-Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.16.6/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.
+Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.17.0/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.

@@ -8,9 +8,22 @@ twitter:title: dex semantic · Exmergo Dex
 
 define dbt or native semantic layers as reviewable diffs
 
+Choose a command, then expand its usage and options. Every command here also accepts the [global options](/dex/cli/overview#global-options).
+
+| Command | What it does |
+| --- | --- |
+| [`dex semantic define`](#dex-semantic-define) | plan new dbt semantic models or metrics |
+| [`dex semantic update`](#dex-semantic-update) | plan changes to existing semantic definitions |
+| [`dex semantic plan`](#dex-semantic-plan) | plan a mix of semantic additions, changes and removals |
+| [`dex semantic ossie`](#dex-semantic-ossie) | plan whole-document edits to a native Apache Ossie layer |
+| [`dex semantic slayer`](#dex-semantic-slayer) | plan whole-file edits to the configured SLayer model files |
+| [`dex semantic cube`](#dex-semantic-cube) | plan whole-file edits to the configured Cube model files |
+
 ## dex semantic define
 
 Validate new semantic models or metrics, including with dbt's own parser, and store them as a plan. Refuses a removal. Repo-only.
+
+<Accordion title="Usage and options for dex semantic define">
 
 ```text
 dex semantic define [--edits-file FILE] [--definitions-file FILE] [--no-parse]
@@ -31,9 +44,13 @@ dex semantic define [--edits-file FILE] [--definitions-file FILE] [--no-parse]
 | `--definitions-file FILE` | definitions written in place, as JSON; '-' reads stdin |  |
 | `--no-parse` | skip validation with dbt's own parser |  |
 
+</Accordion>
+
 ## dex semantic update
 
 Validate changed semantic definitions, removals included, and store them as a plan. Repo-only.
+
+<Accordion title="Usage and options for dex semantic update">
 
 ```text
 dex semantic update [--edits-file FILE] [--definitions-file FILE] [--no-parse]
@@ -54,9 +71,13 @@ dex semantic update [--edits-file FILE] [--definitions-file FILE] [--no-parse]
 | `--definitions-file FILE` | definitions written in place, as JSON; '-' reads stdin |  |
 | `--no-parse` | skip validation with dbt's own parser |  |
 
+</Accordion>
+
 ## dex semantic plan
 
 Validate a payload of semantic definitions and classify each as defined, updated, unchanged or removed, then store a plan. Repo-only.
+
+<Accordion title="Usage and options for dex semantic plan">
 
 ```text
 dex semantic plan [--edits-file FILE] [--definitions-file FILE] [--no-parse]
@@ -77,9 +98,13 @@ dex semantic plan [--edits-file FILE] [--definitions-file FILE] [--no-parse]
 | `--definitions-file FILE` | definitions written in place, as JSON; '-' reads stdin |  |
 | `--no-parse` | skip validation with dbt's own parser |  |
 
+</Accordion>
+
 ## dex semantic ossie
 
 Validate whole Ossie documents at the paths semantic.ossie.files configures, then store a plan. Needs the [ossie] extra. Repo-only.
+
+<Accordion title="Usage and options for dex semantic ossie">
 
 ```text
 dex semantic ossie [--edits-file FILE] [{define,update,plan}] [<intent>]
@@ -98,9 +123,13 @@ dex semantic ossie [--edits-file FILE] [{define,update,plan}] [<intent>]
 | --- | --- | --- |
 | `--edits-file FILE` | whole-document edits payload as JSON; '-' reads stdin |  |
 
+</Accordion>
+
 ## dex semantic slayer
 
 Validate whole SLayer model files at the paths semantic.slayer.models configures, with SLayer's own model, then store a plan. Needs the [slayer] extra. Repo-only.
+
+<Accordion title="Usage and options for dex semantic slayer">
 
 ```text
 dex semantic slayer [--edits-file FILE] [{define,update,plan}] [<intent>]
@@ -119,9 +148,13 @@ dex semantic slayer [--edits-file FILE] [{define,update,plan}] [<intent>]
 | --- | --- | --- |
 | `--edits-file FILE` | whole-document edits payload as JSON; '-' reads stdin |  |
 
+</Accordion>
+
 ## dex semantic cube
 
 Validate whole plain-YAML Cube model files at the paths semantic.cube.files configures, with dex's port of Cube's model rules, then store a plan. Needs the [cube] extra. No Cube server, no warehouse. Repo-only.
+
+<Accordion title="Usage and options for dex semantic cube">
 
 ```text
 dex semantic cube [--edits-file FILE] [{define,update,plan}] [<intent>]
@@ -140,6 +173,8 @@ dex semantic cube [--edits-file FILE] [{define,update,plan}] [<intent>]
 | --- | --- | --- |
 | `--edits-file FILE` | whole-document edits payload as JSON; '-' reads stdin |  |
 
+</Accordion>
+
 Every command here also accepts the [global options](/dex/cli/overview#global-options).
 
-Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.16.6/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.
+Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.17.0/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.
