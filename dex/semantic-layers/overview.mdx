@@ -714,7 +714,8 @@ document, where it references none) and stored as a plan of its own on the Ossie
 layer, named by `data.semantic_proposal.plan_id`; apply both. Where the parents
 span documents or no document can hold it, it is proposed as a document of its
 own, validated the same way, with the `dex config set semantic.ossie.files` that
-adopts it.
+adopts it. If that new document's path is already in `semantic.ossie.files`, it
+is included as a companion plan even before the file exists.
 
 The preservation contract is exact and predictable: Dex does not parse and
 re-serialize accepted content. Apply writes the authored bytes byte-for-byte,
@@ -1424,6 +1425,7 @@ from exmergo_dex_core.explore.semantic.conformance import (
     SemanticCatalogContract,
 )
 
+
 class TestMyBackend(SemanticBackendContract, SemanticCatalogContract):
     def make_backend(self):
         return MyBackend(...)
@@ -1577,4 +1579,4 @@ structured population, screened by the declaration withholding policy. A
 description with no `dex.population` metadata is never edited, even when it says
 `Population:`. The hosted dbt Cloud catalog is not covered.
 
-Source: [`references/semantic-layer.md`](https://github.com/exmergo/dex/blob/v1.17.0/references/semantic-layer.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/semantic-layer.md)). This page is generated; change the source, not the site.
+Source: [`references/semantic-layer.md`](https://github.com/exmergo/dex/blob/v1.17.1/references/semantic-layer.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/semantic-layer.md)). This page is generated; change the source, not the site.

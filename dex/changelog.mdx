@@ -6,6 +6,144 @@ og:title: Changelog · Exmergo Dex
 twitter:title: Changelog · Exmergo Dex
 ---
 
+<Update label="1.17.1" description="2026-11-01">
+
+### Added
+
+- **Verification checks the temporal contract of a snapshot-backed status history.**
+  A snapshot can build while a model over it disagrees about whether the first
+  observation is a transition, whether an unrelated edit counts, or whether a
+  timestamp is business or capture time. A model can now declare `history`: its
+  snapshot, entity and status, and those policies. `maintain verify` and
+  `transform build --verify` derive each entity's expected transition count, latest
+  transition and first attainment from the snapshot's versions and the declared
+  policy, and report disagreements as entity counts (`temporal_*`). Each contract
+  gets a `temporal_contracts` record keeping the snapshot's execution, the assertions
+  checked, and what stayed unchecked apart. A policy left out, late-arriving data
+  whose business and capture order disagree, or a run in which no entity made a
+  transition is never reported as clean. Supported today: one dbt snapshot, one status
+  column, one output row per entity.
+- **Verification measures join coverage and checks a declared parent population.**
+  A left join can keep every driving row and match nothing, so a model builds with
+  plausible row counts and every joined field NULL. `maintain verify` and
+  `transform build --verify` now measure every equality join a model writes, rows
+  and distinct keys apart, and record each one under `join_coverage` as
+  satisfied, contradicted, not applicable (an empty input, never reported as full
+  coverage) or unchecked with a reason code. A join that matches nothing is
+  `join_no_match`; a join the declaration requires is judged against the contract
+  rather than a default threshold; and a column a join supplies that came back all
+  NULL is reported against its declared NULL rule or the cached profile. A model
+  can now declare `population.parent`, the entity it holds one row per, and
+  verification counts the parents missing from it and the keys the parent does not
+  have. The build path runs the join contract for the first time, priced into the
+  build's estimate as `(join overlap probes)`.
+
+### Changed
+
+- **`transform plan` reads set operations from their first branch.**
+  a model whose outermost query is a `UNION`, `UNION ALL`, `EXCEPT`, or
+  `INTERSECT` previously skipped contract comparison because set operations were
+  treated as unresolvable. `transform plan` now reads the model's output columns
+  from its first branch (or from the union of branches for `UNION ALL BY NAME`).
+  declarations pick this up, refusing a declared column absent from a union as
+  they do for a direct SELECT list. ([#1042](https://github.com/exmergo/dex/pull/1042))
+- **A temporal contract no longer reads as `satisfied` for a model that does not
+  descend from its declared snapshot.** Verification walks the manifest's dependencies, free and
+  with no connection. A model that does not descend from `history.snapshot` is
+  `unchecked` with `reason_code: snapshot_not_ancestor`, naming the snapshot and any
+  other snapshot it descends from, and no mismatch is reported against a history it
+  never read. A manifest that cannot answer is `lineage_unavailable`.
+- **The agent procedure separates what a request settles from an inferred default.**
+  The procedure now names `request` or `contract` as an assumption's evidence only
+  when that source actually settles the choice: "event rate per account" alone does
+  not say whether accounts with no events belong, so a reasonable choice there is
+  recorded as `default`, explained in a line, and the work continues. Observed counts
+  describe the data and do not establish an intended population or NULL policy. The
+  metadata-quality eval gains an attribution score, graded apart from the SQL, over
+  four new tasks.
+- **`transform build --full-refresh --verify` checks the rows of the incremental
+  models it rebuilt.** A rebuilt model holding materially fewer or more rows than its
+  driving parent is now reported as `row_loss` or `row_fanout`, as a table is, and
+  the parent's row count is priced in the build's one estimate. An incremental
+  model this build did not rebuild, one whose `full_refresh: false` made dbt ignore
+  the flag, and a microbatch model keep the skip, named in `warnings`. A microbatch
+  model is no longer told to run `dbt compile`, which would not have helped.
+  `maintain verify` compares no incremental model, as before.
+- **`transform plan` checks the column contract through `select *`.** The comparison
+  with `schema.yml` was skipped for every model ending in `select * from final`. It now
+  follows a star through CTEs, subqueries and joins, then to a referenced model's SQL,
+  then to a cached profile, which the warning names. A skipped comparison says what
+  stopped it. Existing projects may see new warnings. Two checks that read the same SELECT
+  list also see through CTEs: a declaration naming a column absent from `final` is now
+  refused, as it already was for a direct SELECT list, and the resolved-key convention
+  warning can fire on more models.
+
+### Fixed
+
+- **Deriving an Ossie document at an already configured path produces a plan.**
+  When the document did not exist yet, `transform plan` and `transform declare`
+  only proposed its contents and incorrectly asked to add the same path to
+  `semantic.ossie.files` again. The derived document is now validated with the
+  configured layer and stored as a companion plan that `transform apply` can write.
+  Unconfigured paths still require explicit adoption. ([#1024](https://github.com/exmergo/dex/pull/1024))
+- **A Snowflake estimate no longer recommends `snowflake.suspend_after_command`
+  when it is already on.** With the setting on, dex still quotes a project's first
+  command that resumes the warehouse the whole `AUTO_SUSPEND` tail, because it
+  counts on a suspend only once it has seen one succeed. The note beside the
+  estimate now says so, and says that later commands get the resume minimum. The
+  advice next to it used to recommend turning the setting on and running
+  `GRANT OPERATE` even when both were done. It now names the `dex config set` only
+  while the setting is off and the grant only after a suspend was refused for
+  lacking it, and dex drops it once a suspend keeps the tail out of the quote. ([#1025](https://github.com/exmergo/dex/pull/1025))
+- **dropped schemas are no longer carried forward as out-of-scope.** when a
+  schema holding cached relations was dropped from the warehouse or left empty,
+  `explore map` treated it as an unobserved namespace and carried its relations
+  forward indefinitely, causing recurring `table_dropped` findings after every
+  snapshot. observed namespaces are now derived from what the adapter examined,
+  so relations in dropped schemas are dropped from the cache while namespaces
+  outside a narrowed `--scope` continue to be carried forward untouched. ([#1032](https://github.com/exmergo/dex/pull/1032))
+- **A star's EXCLUDE/EXCEPT, REPLACE and RENAME now match columns the way the
+  warehouse does.** A qualified modifier (`exclude (a.id)`, `rename (a.id as
+  a_id)`) used to be read as its bare column name, so over a join it also hit the
+  other table's same-named column: an exclusion dropped a column the warehouse
+  keeps, and a rename swallowed it whole. A renamed column now also keeps its
+  star's qualifier, so its lineage resolves in a join instead of being reported
+  unreadable, and a REPLACE of a renamed column decides what the column produces
+  under its new name (Snowflake runs both clauses), rather than the replacement
+  being silently dropped. ([#1036](https://github.com/exmergo/dex/pull/1036))
+- **equivalent column data type aliases are no longer reported as mismatches.**
+  the column contract in `maintain verify` and `transform build --verify`
+  previously compared declared and actual types with a raw case-insensitive
+  string match, reporting equivalent spellings like bigquery `int64` against
+  reported `INTEGER` or duckdb `int` against `INTEGER` as `column_type_mismatch`.
+  type comparison now normalizes connector-specific aliases across integer,
+  string, float, boolean, and temporal families, treats parameterized types
+  compatibly when metadata reflection omits parameters, and falls back to exact
+  matching for unnormalizable types. ([#1037](https://github.com/exmergo/dex/pull/1037))
+- **The metadata eval now counts Dex commands invoked through a wrapper bound in
+  the same command string.** A shell function (`R() { uv ... run.py "$@"; }`) or
+  a variable (`R="uv ... run.py"`) wrapping a Dex invocation used to be invisible
+  to the command tally; calls through the bound name now count like direct ones,
+  while quoted mentions of the bound name (an `echo` inside the wrapper's own
+  body) still stay uncounted. ([#1043](https://github.com/exmergo/dex/pull/1043))
+- **Trino profiling no longer counts distinct values of nested and sketch columns.**
+  Since the exact-count pass began measuring columns with no distinct count,
+  `explore profile` and `explore map` on Trino could run `COUNT(DISTINCT)` on columns
+  such as `array(varchar)`, `json` or `hyperloglog`, which report only a non-null
+  count. Those columns are now skipped, so they keep no distinct count and cannot
+  fail the scan for the rest of the table.
+- **`transform build --verify` reports the column contract `maintain verify` does.**
+  A verified build could return no findings while `maintain verify` reported
+  `column_undeclared` on the same models. The build now reports `column_missing`,
+  `column_undeclared` and `column_type_mismatch` for the models it built, from
+  metadata, with no added statement or estimate. `data.verification.column_contract`
+  names the models checked, those declaring no columns, and those not checked with a
+  reason, such as a failed model whose older relation is still in place. Findings do
+  not change the build's status. `maintain verify` now reports a relation whose
+  metadata cannot be read and carries on, instead of stopping.
+
+</Update>
+
 <Update label="1.17.0" description="2026-10-31">
 
 ### Added
@@ -945,114 +1083,6 @@ twitter:title: Changelog · Exmergo Dex
   plugin ships. When the project pins a different `exmergo-dex-core` in `uv.lock`
   or `pyproject.toml`, every envelope carries one warning naming both versions,
   and reading a cache or drift baseline written by another release warns too.
-
-</Update>
-
-<Update label="1.15.2" description="2026-10-21">
-
-### Added
-
-- **Declarations: a model dex creates or edits can say what it means**
-  ([#491](https://github.com/exmergo/dex/issues/491)). Models dex helped build carried almost no metadata, so the decisions
-  behind the SQL (which statuses count, what one row is, whether a column can be
-  summed, what a NULL means) lived only in an agent's transcript, and those are
-  the decisions agents get wrong. `transform plan` and `semantic define|update|plan`
-  now accept a `declarations` list beside `edits`: per model, a `description`, a
-  `grain`, a `population` (a rule and its filters), each column's `role`,
-  `null_rule`, `aggregation`, `additivity`, `unit` and `references`, and the
-  `assumptions` the model rests on, each with its `evidence` (`request`,
-  `contract`, `precedent`, `data`, `default`).
-
-  - Each declaration is rendered into the model's existing YAML entry, wherever
-    in the project it lives, as a `schema_yml` edit in the same plan: dbt's own
-    `description`, `unique`/`not_null` on a single-column grain, `not_null` for
-    `null_rule: never`, a `relationships` test for a referenced foreign key, and
-    `config.meta.dex` for the rest. A model with no entry gets one beside its SQL;
-    dex never writes a second entry for a model. Only those keys are written, and
-    every other byte of the file, comments included, is kept.
-  - A malformed declaration is refused with the fix named: a column or grain
-    column the model's SELECT list does not produce, a `references` target that
-    does not resolve, an unknown role, additivity, evidence or field, and a
-    population filter listing values on a column that looks like personal data.
-    Missing intent is a warning, never a refusal, including a model the plan
-    writes SQL for with no declaration at all.
-  - A plan carrying declarations or `schema_yml` edits is now parsed by dbt
-    against a throwaway copy of the post-change project before it is stored,
-    degrading to a named warning where dbt is not installed.
-  - The plan, apply and build envelopes carry `data.decisions`: every assumption
-    declared on the models the command touched (`model`, `decision`, `chosen`,
-    `evidence`), read back from the project's YAML.
-  - `maintain reconcile` finds a staging model's YAML and SQL where the project
-    keeps them (a shared `_staging.yml`, a subfolder) with the lookup
-    declarations and `transform place` use, rather than assuming
-    `models/staging/stg_<table>.yml`. A re-scaffold that would have landed beside
-    a model the project keeps elsewhere is refused as misplaced instead of
-    written as a second copy.
-
-  ([#518](https://github.com/exmergo/dex/pull/518))
-
-### Changed
-
-- **The daily spend ceiling admits a command on its calibrated estimate**
-  ([#324](https://github.com/exmergo/dex/issues/324)). `budget.session_ceiling` already charges the day what commands
-  billed, but each new command's dry-run estimate, an upper bound on a
-  partitioned or clustered warehouse, met the day's remainder raw. On BigQuery a
-  build billed 3.45 GB of a 6.70 GB estimate, and the 8.69 GB `explore map --full`
-  that re-baselining requires on the same day was refused against the 6.55 GB
-  real spending had left, so a project could not be re-baselined on any day it
-  was built.
-
-  - Against the cumulative ceiling, the estimate is now scaled by the worst
-    billed-over-estimated ratio among this connector's last settled commands, the
-    history the over-ceiling refusal already quotes. The re-map above is
-    admitted, since history puts it at about 59% of its estimate.
-  - Unchanged by design: `--budget` still meets the raw estimate, `cost.ceiling`
-    and the cap the warehouse is handed are still the real remainder, and a
-    running command still books its raw estimate.
-  - Calibration only ever loosens the check. With fewer than three settled
-    commands on the connector, a worst ratio at or above 100%, or a ratio of 0,
-    the raw estimate is compared as before. The history is read once per
-    command, outside the admission lock.
-  - A command admitted only because of calibration says so in `warnings`.
-
-  ([#569](https://github.com/exmergo/dex/pull/569))
-- **`transform build` names the incremental lines of its estimate that are upper
-  bounds.** On BigQuery, an incremental model's batch filter is usually a watermark
-  computed by a subquery over the model's own relation. A dry run cannot prune
-  partitions on that bound, and the job does when it runs, so the model's
-  `per_table_bytes` line priced the whole history while the build billed only the
-  window. The line is unchanged, since it is still the most the job can bill, but
-  the confirmation now maps each such node to the column it bounds under
-  `data.upper_bounds`, and a note and the over-ceiling refusal say how much of the
-  estimate those lines are, so a build refused on an over-estimate no longer reads
-  as a genuinely expensive one. ([#761](https://github.com/exmergo/dex/pull/761))
-
-### Fixed
-
-- **`explore semantic query` warns when `--limit` exceeds `query.max_rows`.**
-  Passing `--limit 200` with the default 50-row ceiling returned 50 rows and
-  `truncated: true` with no note that the flag had been clamped. The envelope now
-  names both numbers and points at `query.max_rows` in `.dex/config.yml`. When a
-  semantic result is truncated for that ceiling, the same engine-cap hint plain
-  `explore query` already uses is added to the notes. ([#711](https://github.com/exmergo/dex/pull/711))
-- **`transform test --mutate` recognizes set-operation and nested CTEs.** A model whose CTE body is a UNION or contains nested CTEs is no longer spuriously warned about matching none of the model's declared parents. ([#746](https://github.com/exmergo/dex/pull/746))
-- Skill wrapper responses now include the connection block and all cost fields, matching the engine response contract for setup refusals and warm-up results. ([#750](https://github.com/exmergo/dex/pull/750))
-- **`explore map` and `explore profile` no longer call a new, undeclared table "likely orphaned residue".** A table no current dbt model or source builds, in a schema the project builds or sources others into, was always described as residue of a rename or removal, even when the loader had just added it and nothing had modelled it yet. That wording now appears only when the accepted baseline (`.dex/snapshot.json`) already knew the relation. Otherwise, including when there is no baseline or it cannot be read, the note says "no dbt source declares this relation yet; add it to the sources file before modelling it". The relation is still ranked below the ones the project builds. A profile cached before this release keeps its old note until it is profiled again. ([#759](https://github.com/exmergo/dex/pull/759))
-- **`maintain schema` and `maintain check` no longer report relations the
-  project itself builds as `table_added` source drift.** This showed up on
-  DuckDB, where the dev target is the source file. One warning names how many
-  were left out. ([#760](https://github.com/exmergo/dex/pull/760))
-- **`maintain verify` names uncompiled models when row population is suppressed.** When models have no compiled SQL, the suppression reason and warnings name the skipped models with a `dbt compile` or `dbt build` hint rather than falling back to an uninformative generic message. Ephemeral models remain quietly skipped. ([#762](https://github.com/exmergo/dex/pull/762))
-- **A removed YAML entry no longer leaves its comment behind, or takes a blank line
-  that is not its own.** When `maintain reconcile` drops a column from a
-  declaration, or `transform remove` removes an entry, the full-line comments
-  written directly above it at the same indent go with it, instead of ending up
-  above the next entry and describing a column they were never written about. A
-  comment set apart by a blank line is a header for what follows it and stays. And
-  when reconcile removes a `not_null` test from a block-style test list, the blank
-  line after the list now stays, so the separator between two columns survives.
-- **`maintain reconcile` no longer regenerates a staging model, so hand edits survive schema drift.** For a column added, dropped or changing nullability upstream, reconcile used to rebuild the whole `stg_<table>.sql` and `.yml` from the scaffold template and tag the result `mechanical`. That deleted anything written since scaffolding (a cast the warehouse needs, a derived key a mart reads), wrote a second `stg_<table>.yml` when the model was already documented in a shared `schema.yml` (which dbt refuses at parse), and could add a `unique` test the data does not support. Reconcile now edits each drifted column and nothing else: one line in the model's column list, and one entry in whichever YAML file already declares the model. A model declared in more than one file is named in a warning rather than edited in one of them. No test is invented. A dropped column that the model's own logic still reads (`status as order_status`, a `where` on it) is reported as advisory and names that use, and a model downstream still reading the column is named in a warning. When the project already reflects the drift, for example through an applied plan that added the column, the proposal is advisory, no plan is stored, and the hint is to re-run `maintain snapshot`.
-- **`semantic define|update|plan --definitions-file` now edits files with indentless lists.** A `metrics:` or `semantic_models:` list written with `- name:` at column 0 used to be refused as invalid YAML. Definitions are now spliced in at the indent the file already uses. ([#749](https://github.com/exmergo/dex/pull/749))
 
 </Update>
 
