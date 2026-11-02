@@ -231,11 +231,21 @@ dex transform init "<name>"       -> bootstrap a dbt project skeleton; requires 
                                      --layered-schemas routes staging/intermediate/marts to their
                                      own <layer>_<target name> schemas; warns when a target
                                      namespace already holds objects (free metadata check)
-dex transform plan "<intent>"     -> proposed dbt edits as diffs (nothing applied yet)
+dex transform plan "<intent>"     -> proposed dbt edits as diffs (nothing applied yet); a plan that
+                                     rewrites an existing model carries data.refactor_comparison_offer:
+                                     per model the transform compare command and static_attribution
+                                     (unattributed, unmeasured, none, attributed), and data.next names
+                                     the comparison before apply; data.identifier_conversions names
+                                     each cast/try_cast/lower/upper/trim the plan adds to an identifier
+                                     and, gated like row attribution, counts what it does to entities
+                                     (failed, merged, respelled, matched, prior identities lost), with
+                                     a status of lossless, declared, undeclared or unchecked (#861)
 dex transform apply [plan-id]     -> write diffs into the dbt project (a reviewable git diff);
                                      no id means the latest unapplied plan of any kind; once
                                      something is written, data.commit_trailer is the
-                                     Co-authored-by line the commit of those files ends with
+                                     Co-authored-by line the commit of those files ends with;
+                                     data.refactor_comparison reports each rewritten model's recorded
+                                     comparison verdict or not_compared, never enforced
 dex transform plans               -> list stored plans, pending and applied, newest first
 dex transform references <name>   -> where each name is used: model SQL, schema.yml, dbt_project.yml,
   [more...] [--kind K] [--full]      macros, semantic YAML, seed headers, installed packages. Repo-only
@@ -265,7 +275,13 @@ dex transform rename <kind>       -> every edit the rename needs, as one plan: t
                                      and the plan says so. --edits-file carries related hand-authored
                                      edits into the same atomic plan
 dex transform remove <kind> <name>   -> the definition removed, and every read verified gone. Same kinds
-  [--edits-file <f>]                 as rename, same refusals. dex authors the removal of the
+  [--edits-file <f>]                 as rename, same refusals. On var, a `retirement` key in the payload
+                                     states which behavior survives (retained_value, required) and what
+                                     each output holds; data.retirement holds the proposal to it from
+                                     compiled SQL, transform compare compiles its baseline at that value,
+                                     and build --verify --for-plan checks the built columns
+                                     (skills/transform/references/feature-retirement.md).
+                                     dex authors the removal of the
                                      definition and REFUSES while any read survives, naming each with
                                      a file and a line. For a scaffolded model ending in a
                                      trailing `select * from <cte>`, a removed column's definition
@@ -332,7 +348,13 @@ dex transform build --target dev  -> cost preflight FIRST; runs only with --conf
                                      required, which of them ran, and how each requirement was derived.
                                      --no-install-deps refuses a declared-but-uninstalled package by
                                      name, before any subprocess and before pricing, instead of
-                                     installing it
+                                     installing it. data.completion leads data on success and on
+                                     failure: at most 4096 bytes summarizing the change, its required
+                                     deliverables (built, failed, skipped, missing, stale; coverage
+                                     unknown with no plan) and what blocked each, the failing nodes,
+                                     which deliverables anything checked, what verification ran and
+                                     suppressed, the declared obligations by status, and where the
+                                     full evidence is, so a truncated read still has the answer
 dex transform deps                -> install/refresh dbt packages (repo-confined; no warehouse spend)
 dex transform export [plan-id]    -> one stored plan as a portable document a second process can check
                                      and apply: every edit's operation, kind, preimage hash, content
@@ -383,7 +405,10 @@ dex transform compare [plan-id]   -> whether a stored, unapplied plan keeps one 
                                      --key (or the declared grain) adds per-key counts.
                                      data.status is equivalent, different or not_checked with
                                      data.reason_code; equivalent holds for data.input_scope at
-                                     data.compared_at only. Priced before spend on metered connectors
+                                     data.compared_at only. Priced before spend on metered connectors.
+                                     The verdict is recorded on the stored plan for apply and a
+                                     --for-plan build; a parent the last build left error or skipped
+                                     is inputs_unsynchronized before anything compiles
 dex transform test --scaffold <m> -> plan a unit_tests: skeleton for model <m>: a given block per
                                      ref()/source() input with only the columns <m> reads, typed from
                                      the exploration cache; expect: is an empty stub that fails until
@@ -590,7 +615,7 @@ each selected model does not yet declare, lays the supplied `declarations` over
 them field by field, and stores the lot as one capped plan, naming every model it
 skipped and why. The full shape, the refusals and
 what each field renders into:
-[`skills/transform/references/declarations.md`](https://github.com/exmergo/dex/blob/v1.17.1/skills/transform/references/declarations.md).
+[`skills/transform/references/declarations.md`](https://github.com/exmergo/dex/blob/v1.17.2/skills/transform/references/declarations.md).
 
 `kind` is one of `model_sql`, `schema_yml`, `semantic_yml` (optional on
 `semantic define|update`, which imply `semantic_yml`), `packages_yml`,
@@ -1030,8 +1055,12 @@ default, or a filter or operator after it is refused. A key naming a location
   (relative `profiles.yml` paths resolve there, never against the caller's
   shell). When
   `packages.yml` (or a `dependencies.yml` with packages) is declared and
-  `dbt_packages/` is missing, `dbt deps` runs automatically first; `transform
-  deps` is the explicit install/refresh. A missing dev DuckDB database is an
+  `dbt_packages/` is missing, `dbt deps` runs automatically first; `transform deps`
+  is the explicit install/refresh. `--cold-deps` is the explicit proof that
+  a repair survives a reinstall: packages install into an isolated copy, the build
+  runs from it, and `data.cold_verification` lists what the installed tree held
+  that the reinstall did not reproduce. `data.prerequisites` names each failed
+  node's owner, plan relation and supported repairs. A missing dev DuckDB database is an
   actionable refusal when the project reads from sources (seed it first), and a
   warning otherwise. On failure the envelope's `errors[0]` carries the first
   real dbt message; the rest land in `warnings`, per-entry capped, deduplicated,
@@ -1054,7 +1083,10 @@ default, or a filter or operator after it is refused. A key naming a location
   `data.evidence` is where the reasoning lives: the dbt invocation, per-node
   status and materialization and relation, what the selection asked for against
   what it matched, the manifest and run-results digests, the relations the run
-  generated, and the principal errors.
+  generated, and the principal errors. `data.completion` leads the payload with
+  the bounded summary of all of it, because `data.nodes` grows with the project
+  and a reader whose harness cuts the output after a few kilobytes otherwise sees
+  successful staging models and nothing about the deliverable that was skipped.
 
   `coverage` needs to be told which change the build is for, through `--for-plan`
   (a stored plan id) or `--for-plan-file` (an exported plan document, which is
@@ -2110,4 +2142,4 @@ Because every skill, test, and benchmark depends on it, the contract was locked
 before the engine logic was built, and the subcommands fill in against this
 fixed boundary. Exploration, authoring, and maintenance are live today.
 
-Source: [`references/command-contract.md`](https://github.com/exmergo/dex/blob/v1.17.1/references/command-contract.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/command-contract.md)). This page is generated; change the source, not the site.
+Source: [`references/command-contract.md`](https://github.com/exmergo/dex/blob/v1.17.2/references/command-contract.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/command-contract.md)). This page is generated; change the source, not the site.

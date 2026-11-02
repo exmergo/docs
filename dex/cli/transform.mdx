@@ -118,7 +118,7 @@ Run dbt build on a dev target only, after a free preflight and a cost estimate. 
 ```text
 dex transform build [--target TARGET] [--select SELECTOR] [--verify]
     [--for-plan PLAN-ID] [--for-plan-file FILE] [--no-install-deps]
-    [--full-refresh]
+    [--cold-deps] [--full-refresh]
 ```
 
 **Options**
@@ -131,6 +131,7 @@ dex transform build [--target TARGET] [--select SELECTOR] [--verify]
 | `--for-plan PLAN-ID` | report whether the build covered this stored plan |  |
 | `--for-plan-file FILE` | report coverage of an exported plan document |  |
 | `--no-install-deps` | refuse missing dbt packages instead of installing them |  |
+| `--cold-deps` | reinstall packages in an isolated copy and build from it |  |
 | `--full-refresh` | rebuild selected incremental models after their logic changed |  |
 
 </Accordion>
@@ -443,4 +444,4 @@ dex transform preflight [--target TARGET]
 
 Every command here also accepts the [global options](/dex/cli/overview#global-options).
 
-Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.17.1/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.
+Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.17.2/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.
