@@ -67,6 +67,14 @@ This section is the only place in the repository that states the number.
 
 ## The firewall rule
 
+Agent-authored queries must be SELECTs or supported set operations. Query
+bodies in CTEs, subqueries and set-operation branches follow the same rule.
+Nested metadata statements such as `DESCRIBE` are refused before connection
+discovery, profiling or execution, including in scalar expressions and unused
+CTEs. The typed refusal names the unsupported shape and points to
+`explore inventory` or `explore profile` for introspection. This also applies
+to compile-time queries run through `transform plan`.
+
 Output may carry values only from profiled columns whose flag is absent or below
 the threshold. Every value path from a blocking column must pass through a
 measuring aggregate (COUNT, APPROX_COUNT_DISTINCT, AVG, SUM, STDDEV, and the
@@ -83,6 +91,28 @@ warning naming the column, category, and confidence. Treat that warning as
 information for the user, not an error to fix.
 
 Unnested JSON and array outputs inherit the source column's flags.
+
+## Protected values and transformation columns
+
+A refusal to return protected values to an agent does not instruct it to remove,
+redact or replace a column in a user's transformation. When the requested or
+existing output contract includes that field, preserve its authorized pass-through
+through the normal `transform plan` and `transform apply` path where supported,
+then build on dev with verification. Validate column presence and types through
+metadata and use only permitted aggregate evidence for row checks. There is no
+need to retrieve an example of the protected value.
+
+Intentional removal or redaction requires an applicable user instruction or
+contract. Do not invent either as a workaround for an inspection restriction,
+and keep protected examples out of assumptions, tests, logs and explanations.
+Only a human may clear a PII flag.
+
+Permission belongs to the command and operation being performed. A supported
+model pass-through does not authorize exporting the field as a seed: the seed
+header gate still applies because seed values enter the repository. If a
+transformation itself is prohibited or unsupported, report that limitation
+accurately and leave the guard in place. Never bypass a privacy or dev-target
+guard or infer permission from another command's success.
 
 ## The stricter surface
 
@@ -177,4 +207,4 @@ Profiling's own suppression and the diagram renderer are in
 [`project.md`](/dex/reference/project-formats), and the per-backend request gate is in
 [`semantic-layer.md`](/dex/semantic-layers/overview).
 
-Source: [`references/pii-policy.md`](https://github.com/exmergo/dex/blob/v1.17.2/references/pii-policy.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/pii-policy.md)). This page is generated; change the source, not the site.
+Source: [`references/pii-policy.md`](https://github.com/exmergo/dex/blob/v1.17.3/references/pii-policy.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/pii-policy.md)). This page is generated; change the source, not the site.
