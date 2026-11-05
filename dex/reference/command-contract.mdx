@@ -235,11 +235,24 @@ dex transform plan "<intent>"     -> proposed dbt edits as diffs (nothing applie
                                      rewrites an existing model carries data.refactor_comparison_offer:
                                      per model the transform compare command and static_attribution
                                      (unattributed, unmeasured, none, attributed), and data.next names
-                                     the comparison before apply; data.identifier_conversions names
+                                     the comparison before apply; baseline_ready false with
+                                     per_model[].blocked_inputs says the baseline does not build yet
+                                     and leads with the repair in a plan of its own, and
+                                     mixed_with_repair (with a warning) names a plan carrying that
+                                     repair beside the rewrite, which cannot be compared (#1114); data.identifier_conversions names
                                      each cast/try_cast/lower/upper/trim the plan adds to an identifier
                                      and, gated like row attribution, counts what it does to entities
                                      (failed, merged, respelled, matched, prior identities lost), with
-                                     a status of lossless, declared, undeclared or unchecked (#861);
+                                     a status of lossless, declared, undeclared or unchecked (#861),
+                                     matching only partner keys its filters keep and carrying a later
+                                     CTE's row filters back, naming the rest (#1073);
+                                     data.change_scope (#1115), static and free: per existing
+                                     model the plan rewrites, population changed / kept /
+                                     unchecked and each output removed, added, retyped,
+                                     re-aggregated or re-NULLed, every judged change declared
+                                     (an assumption names its column) or undeclared (a warning),
+                                     carried to a --for-plan build's
+                                     completion.obligations.change_scope;
                                      data.model_versions reports each native dbt versioned model
                                      the plan touches: versions (label, file, file_source,
                                      relation), the default before and after, each consumer's ref
@@ -250,9 +263,17 @@ dex transform plan "<intent>"     -> proposed dbt edits as diffs (nothing applie
                                      entry beside a version is refused by code; a promotion is a
                                      warning naming each consumer it moves; independent_models
                                      names a <model>_v<N> copy that is not a version (#859;
-                                     skills/transform/references/model-versions.md)
+                                     skills/transform/references/model-versions.md). A `toggle`
+                                     key in the payload (only this command takes one; #1113) states
+                                     a flag that stays live: variable, on_value and off_value (both
+                                     required), the governed columns and exempt_models. data.toggle
+                                     compiles every project model at each value and names each one
+                                     still outputting a governed column off, or losing one on, from
+                                     compiled SQL alone (skills/transform/references/feature-toggles.md)
 dex transform apply [plan-id]     -> write diffs into the dbt project (a reviewable git diff);
-                                     no id means the latest unapplied plan of any kind; once
+                                     no id means the latest unapplied plan of any kind, named in
+                                     data.resolved_plan and a warnings line, and an empty id is refused
+                                     (reason: request) rather than read as no id (#1103); once
                                      something is written, data.commit_trailer is the
                                      Co-authored-by line the commit of those files ends with;
                                      data.refactor_comparison reports each rewritten model's recorded
@@ -292,6 +313,10 @@ dex transform remove <kind> <name>   -> the definition removed, and every read v
                                      compiled SQL, transform compare compiles its baseline at that value,
                                      and build --verify --for-plan checks the built columns
                                      (skills/transform/references/feature-retirement.md).
+                                     Where the reference scan cannot finish, `scope: authored`
+                                     keeps those checks for the outputs the contract names and
+                                     reports discovery unchecked (data.retirement.discovery, and a
+                                     reference_discovery record in the build's verification).
                                      dex authors the removal of the
                                      definition and REFUSES while any read survives, naming each with
                                      a file and a line. For a scaffolded model ending in a
@@ -351,14 +376,19 @@ dex transform build --target dev  -> cost preflight FIRST; runs only with --conf
                                      or shared, refused when another runtime left it incompatible
                                      data.outcome says what the run established, which success cannot:
                                      success is dbt's exit code and an empty selection exits zero, so
-                                     empty_selection, unrelated, partial, skipped, stale, failed and
-                                     not_run are all distinguishable from validated. data.evidence
-                                     carries the invocation, typed per-node statuses, the selection
-                                     asked for against what it got, the manifest and run-results
-                                     digests, the relations generated, and the principal errors.
+                                     empty_selection, unrelated, partial, skipped, indeterminate,
+                                     stale, failed and not_run are all distinguishable from
+                                     validated. A node status outside dbt's known words is
+                                     indeterminate: never built, never validated, not a failure.
+                                     data.evidence carries the invocation, typed per-node statuses,
+                                     the selection asked for against what it got, the manifest and
+                                     run-results digests, the relations this run's successful nodes
+                                     generated (never a skipped node's surviving relation), and the
+                                     principal errors.
                                      --for-plan (a stored id) or --for-plan-file (an exported document,
                                      which is what a sandbox holds) adds coverage: the nodes the change
-                                     required, which of them ran, and how each requirement was derived.
+                                     required, which of them ran, and how each requirement was derived;
+                                     an empty one is refused before anything runs, not read as absent.
                                      --no-install-deps refuses a declared-but-uninstalled package by
                                      name, before any subprocess and before pricing, instead of
                                      installing it. data.completion leads data on success and on
@@ -367,7 +397,14 @@ dex transform build --target dev  -> cost preflight FIRST; runs only with --conf
                                      unknown with no plan) and what blocked each, the failing nodes,
                                      which deliverables anything checked, what verification ran and
                                      suppressed, the declared obligations by status, and where the
-                                     full evidence is, so a truncated read still has the answer
+                                     full evidence is, so a truncated read still has the answer.
+                                     With --verify and a plan carrying a toggle (#1113),
+                                     data.verification.toggle judges the built relations' columns from
+                                     metadata at the value this build gave the flag: every model when
+                                     off (toggle_column_present_when_off, an empty table included),
+                                     every producer when on (toggle_column_missing_when_on); the other
+                                     value is unchecked (branch_not_built). Each record reaches
+                                     data.completion.obligations
 dex transform deps                -> install/refresh dbt packages (repo-confined; no warehouse spend)
 dex transform export [plan-id]    -> one stored plan as a portable document a second process can check
                                      and apply: every edit's operation, kind, preimage hash, content
@@ -381,7 +418,8 @@ dex transform apply               -> applies a plan document in this checkout, w
                                      a document that verifies on its own terms and is not the plan the
                                      caller pinned. Containment and kind placement are re-checked
                                      against this checkout's own surface. A file this checkout edited
-                                     first is a conflict, not an overwrite
+                                     first is a conflict, not an overwrite. An empty --plan-file is
+                                     refused, never routed to the latest stored plan
 dex transform ground [plan-id]    -> what the plan depends on and how finished the answer is:
                                      dependencies, the relations behind them, what could not be
                                      resolved (with file and line), what more than one thing defines,
@@ -419,13 +457,27 @@ dex transform compare [plan-id]   -> whether a stored, unapplied plan keeps one 
                                      data.status is equivalent, different or not_checked with
                                      data.reason_code; equivalent holds for data.input_scope at
                                      data.compared_at only. Priced before spend on metered connectors.
+                                     A plan with a toggle compiles both sides at its on_value
+                                     (data.baseline_vars, data.proposed_vars).
                                      The verdict is recorded on the stored plan for apply and a
-                                     --for-plan build; a parent the last build left error or skipped
-                                     is inputs_unsynchronized before anything compiles
+                                     --for-plan build; a parent whose latest build attempt (ordinary
+                                     or --cold-deps, whichever ran last) left it error or skipped is
+                                     inputs_unsynchronized before anything compiles, and the detail
+                                     names the repair as its own plan, built, then this plan compared
+                                     unapplied. A recorded verdict carries inputs_built_by (invocation_id,
+                                     generated_at, cold): the latest build among the model's upstream
+                                     models, one run, recorded with it; null where no build
+                                     attempted them (#1114)
 dex transform test --scaffold <m> -> plan a unit_tests: skeleton for model <m>: a given block per
                                      ref()/source() input with only the columns <m> reads, typed from
                                      the exploration cache; expect: is an empty stub that fails until
-                                     filled in (dbt-parse-checked; apply like any plan)
+                                     filled in (dbt-parse-checked; apply like any plan). A RANGE frame
+                                     with a day or week interval over a date column of one input gets
+                                     boundary rows (current day, last included, first excluded, a gap),
+                                     named in data.window_boundaries (#1112). A model with an
+                                     {% if is_incremental() %} branch gets a second test with the
+                                     is_incremental override and a typed `this` fixture, with rows
+                                     before, on and after the watermark it read (data.incremental)
 dex transform test --mutate <m>   -> measure the tests <m> already has: plant standard analytics
                                      defects in its SQL one at a time, run its own tests against each,
                                      and report which defects nothing caught. Dev-target only, and
@@ -540,7 +592,9 @@ dex maintain verify [<selector>]  -> is the project correct right now, no .dex/s
                                      contract: every equality join's coverage, rows and distinct keys
                                      apart, one data.join_coverage record per join (satisfied,
                                      contradicted, not_applicable for an empty input, unchecked with a
-                                     reason_code); join_no_match for a nonempty population matching
+                                     reason_code), a side read through a simple WHERE-only CTE measured
+                                     over its filtered rows with effective_input on the record (#1085),
+                                     any other filtering CTE unchecked as filtered_cte; join_no_match for a nonempty population matching
                                      nothing, join_orphans and join_zero_overlap against the contract or
                                      the stated defaults, join_field_all_null and join_field_newly_null
                                      for a column the join supplies that came back all NULL. A project that fails
@@ -638,7 +692,7 @@ each selected model does not yet declare, lays the supplied `declarations` over
 them field by field, and stores the lot as one capped plan, naming every model it
 skipped and why. The full shape, the refusals and
 what each field renders into:
-[`skills/transform/references/declarations.md`](https://github.com/exmergo/dex/blob/v1.17.3/skills/transform/references/declarations.md).
+[`skills/transform/references/declarations.md`](https://github.com/exmergo/dex/blob/v1.17.4/skills/transform/references/declarations.md).
 
 `kind` is one of `model_sql`, `schema_yml`, `semantic_yml` (optional on
 `semantic define|update`, which imply `semantic_yml`), `packages_yml`,
@@ -703,7 +757,9 @@ would change, computes the diffs, and stores the plan under
 `.dex/plans/<plan-id>.json`. Nothing touches the dbt project until an apply.
 `packages_yml` is the guarded way to declare dbt package dependencies: a
 reviewable diff like any other edit, then `transform deps` (or the automatic
-deps step in `transform build`) installs them. `macro_sql` is how a macro is
+deps step in `transform build`) installs them. Installing the packages a project
+declares (at the versions `package-lock.yml` pins, where it matches) is not
+installing or upgrading a tool. `macro_sql` is how a macro is
 repaired or customized by hand; `transform macro <name>` is the scaffolding path
 for the macros dex ships. `snapshot_sql` and `seed_csv` bring slowly-changing
 dimension capture and small reference tables into the same flow, each confined to
@@ -750,7 +806,24 @@ The defect classes are the ones that recur in analytics code: a boundary
 comparison flipped to include or exclude its edge, a `WHERE` predicate dropped or
 negated, an inner join swapped for a left join or the reverse, a `CASE` branch
 removed, a ratio inverted, a window frame bound shifted by one, and `sum`
-swapped with `max`. Each finding is written as the defect rather than as a diff,
+swapped with `max`.
+
+A window frame's first constant bound moves one step wider. A `ROWS` bound counts
+rows; a numeric `RANGE` bound counts units of the ordering value, and its defect
+says so. An interval bound (`RANGE BETWEEN INTERVAL '6 day' PRECEDING`) gets two
+mutants, one unit wider and one unit narrower, because a calendar window asks two
+boundary questions: does the first day it should exclude leak in, and is the last
+day it should include still counted. Only the quantity changes; the unit is kept as
+written. Each window mutant carries `frame` (`kind`, `side`, `unit`, `from`, `to`,
+`last_included`, `first_excluded`), and an interval survivor's `suggested_test`
+names the two days a fixture needs rows on, with a gap in the dates so a row-count
+frame cannot give the same answer (#1112). Every bound no mutant moved is listed in
+`data.unsupported_sites` with a `reason_code` (`non_literal_offset`,
+`fractional_offset`, `compound_interval`, `string_offset`, `negative_offset`,
+`unknown_unit`, `other_bound_of_mutated_frame`), with a warning, and is never
+counted toward the cap: its boundary is untested by the run. `UNBOUNDED` and
+`CURRENT ROW` have no offset and are not listed. A model whose only mutable SQL is
+such a bound is refused, naming it. Each finding is written as the defect rather than as a diff,
 and carries `suggested_test`, because the reader's next action is to write a
 test.
 
@@ -900,7 +973,9 @@ default, or a filter or operator after it is refused. A key naming a location
   connectors. On success init writes `connector`, `dbt_project_dir`, and
   `dbt_target: dev` back to `.dex/config.yml`, so the choice is made once and is
   ambient for every later command. Every connector renders: DuckDB, BigQuery,
-  Snowflake, Databricks, Postgres, and Redshift.
+  Snowflake, Databricks, Postgres, and Redshift. On BigQuery, `--project <id>`
+  names the project explicitly: it wins over a configured or discovered one, and
+  init writes the same value to `bigquery.project`.
 
   `--layered-schemas` opts into per-layer schema routing: init additionally
   scaffolds `models/intermediate/`, the shipped `generate_schema_name` macro
@@ -1026,6 +1101,20 @@ default, or a filter or operator after it is refused. A key naming a location
   applies the latest unapplied plan of any kind (semantic plans included; `emit
   dbt` remains the semantic-scoped spelling). `transform plans` lists what is
   stored, pending and applied.
+- **No plan id names the plan; an empty one is refused.** `transform apply`,
+  `export`, `ground`, `classify` and `compare` all read a missing id as the
+  latest unapplied plan, and each says which one it picked: `data.resolved_plan`
+  is `{plan_id, intent, created_at, resolved_from: "latest_unapplied"}`, beside
+  `data.plan_id`, and one `warnings` line names the same plan, on a refusal
+  raised after the pick too (a containment refusal on apply, a plan with no
+  baseline on compare), where a host calling the engine in process finds it as
+  the exception's `resolved_plan`. An explicit id carries neither. An id given but empty or blank (`apply ""`, which is what
+  `apply "$(dex transform plan ...)"` passes when the plan failed) is refused
+  with `reason: request` before the store is read, and so are an empty
+  `--plan-file`, `--for-plan` and `--for-plan-file`, because reading any of them
+  as absent does something the caller did not ask for (#1103). An unquoted empty
+  substitution leaves no argument at all and cannot be told from an omitted one,
+  which is why the resolution is always named.
 - **A commit of what dex wrote credits Dex.** dex never commits, so an apply
   that wrote at least one file, from the store or from `--plan-file`, hands the
   credit to whoever does: `data.commit_trailer` is
@@ -1106,11 +1195,15 @@ default, or a filter or operator after it is refused. A key naming a location
   line and because consumers read it. `outcome` is `validated` only when every
   node the change required ran and passed against artifacts that still describe
   the tree; otherwise it is `empty_selection`, `unrelated`, `partial`, `skipped`,
-  `stale`, `failed`, or `not_run`, each of which a caller acts on differently.
-  `data.evidence` is where the reasoning lives: the dbt invocation, per-node
-  status and materialization and relation, what the selection asked for against
-  what it matched, the manifest and run-results digests, the relations the run
-  generated, and the principal errors. `data.completion` leads the payload with
+  `indeterminate`, `stale`, `failed`, or `not_run`, each of which a caller acts on
+  differently. `indeterminate` is a run where nothing failed and a node reported a
+  status dex does not recognize (`partial success`, `no-op`): such a node is never
+  counted as built and never read as a pass, and a required one is listed under
+  `data.completion.deliverables.unrecognized`. `data.evidence` is where the
+  reasoning lives: the dbt invocation, per-node status and materialization and
+  relation, what the selection asked for against what it matched, the manifest
+  and run-results digests, the relations the run's successful nodes generated
+  (a skipped node's surviving relation is not one), and the principal errors. `data.completion` leads the payload with
   the bounded summary of all of it, because `data.nodes` grows with the project
   and a reader whose harness cuts the output after a few kilobytes otherwise sees
   successful staging models and nothing about the deliverable that was skipped.
@@ -1120,8 +1213,9 @@ default, or a filter or operator after it is refused. A key naming a location
   what a build sandbox holds instead of a store). It reports the nodes the change
   required, which of them ran, and how each requirement was derived: a model edit
   requires its own node, a `schema.yml` the nodes it documents, and a semantic
-  YAML the dbt model its semantic model sits on. Without either flag there is no
-  coverage and the key is absent rather than empty, because an empty coverage
+  YAML the dbt model its semantic model sits on. An empty `--for-plan` or
+  `--for-plan-file` is refused rather than read as absent. Without either flag
+  there is no coverage and the key is absent rather than empty, because an empty coverage
   block reads as "nothing required was built", which is the opposite of "nobody
   asked what was required".
 
@@ -2211,4 +2305,4 @@ Because every skill, test, and benchmark depends on it, the contract was locked
 before the engine logic was built, and the subcommands fill in against this
 fixed boundary. Exploration, authoring, and maintenance are live today.
 
-Source: [`references/command-contract.md`](https://github.com/exmergo/dex/blob/v1.17.3/references/command-contract.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/command-contract.md)). This page is generated; change the source, not the site.
+Source: [`references/command-contract.md`](https://github.com/exmergo/dex/blob/v1.17.4/references/command-contract.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/command-contract.md)). This page is generated; change the source, not the site.

@@ -98,7 +98,7 @@ dex transform apply [--plan-file FILE] [--expect-digest HEX] [<plan-id>]
 
 | Argument | Description | Default |
 | --- | --- | --- |
-| `[<plan-id>]` | plan to apply (default: latest unapplied) |  |
+| `[<plan-id>]` | plan to apply (default: latest unapplied, named in data.resolved_plan) |  |
 
 **Options**
 
@@ -138,7 +138,7 @@ dex transform build [--target TARGET] [--select SELECTOR] [--verify]
 
 ## dex transform deps
 
-Run dbt deps inside the project. Repo-confined, with no warehouse spend.
+Run dbt deps inside the project. It installs the packages the project already declares in packages.yml, at the versions package-lock.yml pins where the lockfile matches that file (dbt resolves them again where it does not); it does not install or upgrade a tool. Repo-confined, with no warehouse spend.
 
 <Accordion title="Usage and options for dex transform deps">
 
@@ -350,7 +350,7 @@ dex transform compare [--model MODEL] [--map OLD=NEW] [--key COLUMN]
 
 | Argument | Description | Default |
 | --- | --- | --- |
-| `[<plan_id>]` | stored plan id; defaults to the latest unapplied plan |  |
+| `[<plan_id>]` | stored plan id (default: latest unapplied, named in data.resolved_plan) |  |
 
 **Options**
 
@@ -378,7 +378,7 @@ dex transform export [<plan-id>]
 
 | Argument | Description | Default |
 | --- | --- | --- |
-| `[<plan-id>]` | plan to export (default: latest unapplied) |  |
+| `[<plan-id>]` | plan to export (default: latest unapplied, named in data.resolved_plan) |  |
 
 </Accordion>
 
@@ -396,7 +396,7 @@ dex transform ground [<plan-id>]
 
 | Argument | Description | Default |
 | --- | --- | --- |
-| `[<plan-id>]` | plan to ground (default: latest unapplied) |  |
+| `[<plan-id>]` | plan to ground (default: latest unapplied, named in data.resolved_plan) |  |
 
 </Accordion>
 
@@ -414,7 +414,7 @@ dex transform classify [--edits-file FILE] [<plan-id>]
 
 | Argument | Description | Default |
 | --- | --- | --- |
-| `[<plan-id>]` | plan to classify (default: latest unapplied) |  |
+| `[<plan-id>]` | plan to classify (default: latest unapplied, named in data.resolved_plan) |  |
 
 **Options**
 
@@ -444,4 +444,4 @@ dex transform preflight [--target TARGET]
 
 Every command here also accepts the [global options](/dex/cli/overview#global-options).
 
-Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.17.3/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.
+Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.17.4/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.
