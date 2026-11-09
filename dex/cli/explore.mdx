@@ -143,8 +143,8 @@ Run one or more SELECT statements through the query firewall, which returns valu
 <Accordion title="Usage and options for dex explore query">
 
 ```text
-dex explore query [--sql-file FILE] [--across DATASETS] [--no-auto-profile]
-    [<statement> ...]
+dex explore query [--sql-file FILE] [--across DATASETS] [--target TARGET]
+    [--no-auto-profile] [<statement> ...]
 ```
 
 **Arguments**
@@ -159,6 +159,7 @@ dex explore query [--sql-file FILE] [--across DATASETS] [--no-auto-profile]
 | --- | --- | --- |
 | `--sql-file FILE` | read statements from a file, one per line or ;-separated |  |
 | `--across DATASETS` | run each statement once per dataset, substituted for \{ds\} |  |
+| `--target TARGET` | also read this dbt dev target's namespace; prod-looking targets are refused |  |
 | `--no-auto-profile` | refuse unprofiled objects instead of profiling them first |  |
 
 </Accordion>
@@ -230,4 +231,4 @@ dex explore semantic [--metric METRICS] [--for-dimension DIMENSIONS]
 
 Every command here also accepts the [global options](/dex/cli/overview#global-options).
 
-Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.17.4/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.
+Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.17.5/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.

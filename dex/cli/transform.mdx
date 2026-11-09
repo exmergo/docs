@@ -343,7 +343,8 @@ Compile the model with and without the plan, then compare output columns and the
 
 ```text
 dex transform compare [--model MODEL] [--map OLD=NEW] [--key COLUMN]
-    [--accept-type COLUMN] [--target TARGET] [<plan_id>]
+    [--accept-type COLUMN] [--expect JSON | --expect-file PATH]
+    [--target TARGET] [<plan_id>]
 ```
 
 **Arguments**
@@ -360,6 +361,8 @@ dex transform compare [--model MODEL] [--map OLD=NEW] [--key COLUMN]
 | `--map OLD=NEW` | a baseline output column the plan renames (repeatable) |  |
 | `--key COLUMN` | baseline key column, repeatable; default: declared grain |  |
 | `--accept-type COLUMN` | baseline column whose type may change in its family |  |
+| `--expect JSON` | JSON: the rows the plan may add, remove and change |  |
+| `--expect-file PATH` | read `--expect`'s JSON from a file ("-" reads stdin) |  |
 | `--target TARGET` | dbt dev target to read; prod-looking targets are refused |  |
 
 </Accordion>
@@ -444,4 +447,4 @@ dex transform preflight [--target TARGET]
 
 Every command here also accepts the [global options](/dex/cli/overview#global-options).
 
-Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.17.4/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.
+Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.17.5/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.
