@@ -24,6 +24,7 @@ Choose a command, then expand its usage and options. Every command here also acc
 | [`dex transform remove`](#dex-transform-remove) | plan a definition's removal, refusing while reads remain |
 | [`dex transform place`](#dex-transform-place) | plan where a shared derived column should be defined |
 | [`dex transform declare`](#dex-transform-declare) | propose declarations for models that already exist |
+| [`dex transform repair`](#dex-transform-repair) | draft an override that repairs a failing package model |
 | [`dex transform test`](#dex-transform-test) | scaffold a unit test, or mutation-test existing tests |
 | [`dex transform compare`](#dex-transform-compare) | compare a model before and after a stored plan |
 | [`dex transform export`](#dex-transform-export) | export a stored plan as a portable, digested document |
@@ -126,7 +127,7 @@ dex transform build [--target TARGET] [--select SELECTOR] [--verify]
 | Option | Description | Default |
 | --- | --- | --- |
 | `--target TARGET` | dbt target to build; prod-looking targets are refused |  |
-| `--select SELECTOR` | dbt node selection, passed through to dbt |  |
+| `--select SELECTOR` | dbt node selection (one or more selectors, or quoted), passed through to dbt |  |
 | `--verify` | run the maintain verify sweep over the built nodes |  |
 | `--for-plan PLAN-ID` | report whether the build covered this stored plan |  |
 | `--for-plan-file FILE` | report coverage of an exported plan document |  |
@@ -308,6 +309,24 @@ dex transform declare [--edits-file FILE] [--limit N] [--intent INTENT]
 
 </Accordion>
 
+## dex transform repair
+
+Read the latest build's failure of a package model, restate its SQL as a project override (package macros qualified, vars resolved, the package node disabled), convert the columns the error names where the cached profile settles what they hold, compile it, and store it as a plan. Nothing is applied.
+
+<Accordion title="Usage and options for dex transform repair">
+
+```text
+dex transform repair [<model> ...]
+```
+
+**Arguments**
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `[<model> ...]` | a failing package model (`model` or `pkg.model`) |  |
+
+</Accordion>
+
 ## dex transform test
 
 `--scaffold` plans a unit_tests skeleton for a model. `--mutate` plants one defect at a time and reports which ones no test caught; `--downstream` also counts the tests of the models that read it. Mutation runs dbt on the dev target and is billed on metered connectors.
@@ -447,4 +466,4 @@ dex transform preflight [--target TARGET]
 
 Every command here also accepts the [global options](/dex/cli/overview#global-options).
 
-Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.17.5/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.
+Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.17.6/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.
