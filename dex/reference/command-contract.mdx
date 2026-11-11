@@ -785,7 +785,7 @@ each selected model does not yet declare, lays the supplied `declarations` over
 them field by field, and stores the lot as one capped plan, naming every model it
 skipped and why. The full shape, the refusals and
 what each field renders into:
-[`skills/transform/references/declarations.md`](https://github.com/exmergo/dex/blob/v1.17.6/skills/transform/references/declarations.md).
+[`skills/transform/references/declarations.md`](https://github.com/exmergo/dex/blob/v1.17.7/skills/transform/references/declarations.md).
 
 `kind` is one of `model_sql`, `schema_yml`, `semantic_yml` (optional on
 `semantic define|update`, which imply `semantic_yml`), `packages_yml`,
@@ -1667,7 +1667,9 @@ default, or a filter or operator after it is refused. A key naming a location
   re-parses the result and compares it against what was sent. A file whose
   layout it cannot span safely (a flow-style sequence, anchors or aliases,
   multiple documents, tab indentation) is refused with `--edits-file` named as
-  the way to edit it. Classification is scoped to the definitions named, so a
+  the way to edit it. Anchors and aliases are read from the YAML parse, so
+  `*emphasis*` in a comment or a description does not count as one, and a file
+  that does not parse is refused saying so. Classification is scoped to the definitions named, so a
   spliced file's other definitions are reported in no class at all. Names
   implicitly created by `create_metric: true` measures count as existing metrics
   everywhere. Beyond MetricFlow's schemas, the engine
@@ -2457,4 +2459,4 @@ Because every skill, test, and benchmark depends on it, the contract was locked
 before the engine logic was built, and the subcommands fill in against this
 fixed boundary. Exploration, authoring, and maintenance are live today.
 
-Source: [`references/command-contract.md`](https://github.com/exmergo/dex/blob/v1.17.6/references/command-contract.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/command-contract.md)). This page is generated; change the source, not the site.
+Source: [`references/command-contract.md`](https://github.com/exmergo/dex/blob/v1.17.7/references/command-contract.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/command-contract.md)). This page is generated; change the source, not the site.
