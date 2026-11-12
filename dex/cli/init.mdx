@@ -1,0 +1,40 @@
+---
+title: dex init
+sidebarTitle: init
+description: Set up a Dex project, try a local demo, adopt existing dbt, or explore without dbt. Managed docs, connection checks and readiness for agents and terminals.
+og:title: dex init · Exmergo Dex
+twitter:title: dex init · Exmergo Dex
+---
+
+set up a Dex project, adopt dbt, or explore without dbt
+
+```text
+dex init [--mode {new,demo,adopt,explore}] [--project-dir PROJECT_DIR]
+    [--target TARGET] [--dev-destination DEV_DESTINATION]
+    [--agent-file {AGENTS.md,CLAUDE.md}] [--no-agent-instructions]
+    [--no-interactive] [--layered-schemas] [--in-place] [<name>]
+```
+
+**Arguments**
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `[<name>]` | dbt project name; '.' is in-place; .dex stays at repo root |  |
+
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--mode {new,demo,adopt,explore}` | new project, complete demo, adopt dbt, or explore without dbt |  |
+| `--project-dir PROJECT_DIR` | existing dbt project to adopt (repository-relative) |  |
+| `--target TARGET` | existing dev target to adopt |  |
+| `--dev-destination DEV_DESTINATION` | dev namespace: dataset, schema, or database/catalog.schema |  |
+| `--agent-file {AGENTS.md,CLAUDE.md}` | agent instruction file to update; repeat to select both |  |
+| `--no-agent-instructions` | skip managed agent instructions |  |
+| `--no-interactive` | return structured missing inputs without terminal questions |  |
+| `--layered-schemas` | build each dbt layer into its own schema |  |
+| `--in-place` | scaffold dbt in the current directory |  |
+
+Every command here also accepts the [global options](/dex/cli/overview#global-options).
+
+Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.17.8/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.

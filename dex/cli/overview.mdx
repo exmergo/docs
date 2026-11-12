@@ -22,6 +22,7 @@ No warehouse yet: `dex demo` seeds a local one, no credentials needed. Have one 
 
 | Group | What it does |
 | --- | --- |
+| [`dex init`](/dex/cli/init) | set up a Dex project, adopt dbt, or explore without dbt |
 | [`dex connect`](/dex/cli/connect) | check a connector's own credentials and capabilities |
 | [`dex explore`](/dex/cli/explore) | make sense of a warehouse: rank objects, profile columns, infer joins |
 | [`dex transform`](/dex/cli/transform) | author and refactor dbt models, tests, and the semantic layer |
@@ -30,6 +31,7 @@ No warehouse yet: `dex demo` seeds a local one, no credentials needed. Have one 
 | [`dex config`](/dex/cli/config) | read, check and change .dex/config.yml, as reviewable diffs |
 | [`dex demo`](/dex/cli/demo) | create a seeded local DuckDB warehouse to try dex against (no credentials, no network) |
 | [`dex procedure`](/dex/cli/procedure) | print the agent procedure, or the block to paste into CLAUDE.md / AGENTS.md (no connection) |
+| [`dex feedback`](/dex/cli/feedback) | report a bug or suggest an improvement: the environment to paste and prefilled issue links (no connection, nothing sent) |
 
 ## Global options
 
@@ -51,4 +53,4 @@ Every command accepts these. The last column says where on the command line each
 | `--cache-backend NAME` | where .dex/ state is kept for this run; must precede the group | before the group only |
 | `--project-format NAME` | transformation project format for this run; must precede the group | before the group only |
 
-Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.17.7/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.
+Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.17.8/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.

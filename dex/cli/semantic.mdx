@@ -18,6 +18,7 @@ Choose a command, then expand its usage and options. Every command here also acc
 | [`dex semantic ossie`](#dex-semantic-ossie) | plan whole-document edits to a native Apache Ossie layer |
 | [`dex semantic slayer`](#dex-semantic-slayer) | plan whole-file edits to the configured SLayer model files |
 | [`dex semantic cube`](#dex-semantic-cube) | plan whole-file edits to the configured Cube model files |
+| [`dex semantic databricks`](#dex-semantic-databricks) | plan whole-file edits to the Metric View YAML files |
 
 ## dex semantic define
 
@@ -102,12 +103,14 @@ dex semantic plan [--edits-file FILE] [--definitions-file FILE] [--no-parse]
 
 ## dex semantic ossie
 
-Validate whole Ossie documents at the paths semantic.ossie.files configures, then store a plan. Needs the [ossie] extra. Repo-only.
+Validate whole Ossie documents at the paths semantic.ossie.files configures, then store a plan. `--from-metric-view` proposes the document from a Metric View file through dex's port of apache/ossie-converters. Needs the [ossie] extra. Repo-only.
 
 <Accordion title="Usage and options for dex semantic ossie">
 
 ```text
-dex semantic ossie [--edits-file FILE] [{define,update,plan}] [<intent>]
+dex semantic ossie [--edits-file FILE] [--from-metric-view FILE]
+    [--name MODEL] [--dataset-metrics] [--into PATH] [{define,update,plan}]
+    [<intent>]
 ```
 
 **Arguments**
@@ -122,6 +125,10 @@ dex semantic ossie [--edits-file FILE] [{define,update,plan}] [<intent>]
 | Option | Description | Default |
 | --- | --- | --- |
 | `--edits-file FILE` | whole-document edits payload as JSON; '-' reads stdin |  |
+| `--from-metric-view FILE` | propose the Ossie documents from these Metric Views |  |
+| `--name MODEL` | the model and fact dataset name |  |
+| `--dataset-metrics` | write fact-only measures as dataset metrics |  |
+| `--into PATH` | output path (default: beside the configured files) |  |
 
 </Accordion>
 
@@ -175,6 +182,35 @@ dex semantic cube [--edits-file FILE] [{define,update,plan}] [<intent>]
 
 </Accordion>
 
+## dex semantic databricks
+
+Validate whole Metric View YAML files at the paths semantic.databricks.files configures, with dex's port of the Metric View YAML 1.1 rules, then store a plan. `--from-ossie` proposes the view from an Ossie document through dex's port of apache/ossie-converters. Needs the [metric-views] extra. Never deploys a view and opens no workspace connection. Repo-only.
+
+<Accordion title="Usage and options for dex semantic databricks">
+
+```text
+dex semantic databricks [--edits-file FILE] [--from-ossie FILE]
+    [--fact DATASET] [--into PATH] [{define,update,plan}] [<intent>]
+```
+
+**Arguments**
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `[{define,update,plan}]` | define new documents, update existing ones, or plan a mix |  |
+| `[<intent>]` | one line saying what the change is for |  |
+
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--edits-file FILE` | whole-document edits payload as JSON; '-' reads stdin |  |
+| `--from-ossie FILE` | propose the Metric View from these Ossie documents |  |
+| `--fact DATASET` | the dataset the view is on (several roots) |  |
+| `--into PATH` | output path (default: beside the configured files) |  |
+
+</Accordion>
+
 Every command here also accepts the [global options](/dex/cli/overview#global-options).
 
-Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.17.7/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.
+Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.17.8/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.

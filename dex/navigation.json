@@ -44,6 +44,7 @@
               "group": "CLI",
               "pages": [
                 "dex/cli/overview",
+                "dex/cli/init",
                 "dex/cli/connect",
                 "dex/cli/explore",
                 "dex/cli/transform",
@@ -51,7 +52,8 @@
                 "dex/cli/maintain",
                 "dex/cli/config",
                 "dex/cli/demo",
-                "dex/cli/procedure"
+                "dex/cli/procedure",
+                "dex/cli/feedback"
               ]
             },
             {
@@ -88,7 +90,8 @@
               "pages": [
                 "dex/semantic-layers/overview",
                 "dex/semantic-layers/ossie",
-                "dex/semantic-layers/cube"
+                "dex/semantic-layers/cube",
+                "dex/semantic-layers/databricks-metric-views"
               ]
             },
             {
