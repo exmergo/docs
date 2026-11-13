@@ -72,6 +72,14 @@
     "destination": "/dex/connectors/trino"
   },
   {
+    "source": "/dex/references/dex-semantics",
+    "destination": "/dex/semantic-layers/dex-semantics"
+  },
+  {
+    "source": "/dex/references/dex-semantics.md",
+    "destination": "/dex/semantic-layers/dex-semantics"
+  },
+  {
     "source": "/dex/references/semantic-layer",
     "destination": "/dex/semantic-layers/overview"
   },
@@ -102,6 +110,14 @@
   {
     "source": "/dex/references/databricks-metric-views-compatibility.md",
     "destination": "/dex/semantic-layers/databricks-metric-views"
+  },
+  {
+    "source": "/dex/references/snowflake-semantic-views-compatibility",
+    "destination": "/dex/semantic-layers/snowflake-semantic-views"
+  },
+  {
+    "source": "/dex/references/snowflake-semantic-views-compatibility.md",
+    "destination": "/dex/semantic-layers/snowflake-semantic-views"
   },
   {
     "source": "/dex/references/ossie-walkthrough",

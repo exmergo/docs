@@ -88,10 +88,12 @@
             {
               "group": "Semantic layer compatibility",
               "pages": [
+                "dex/semantic-layers/dex-semantics",
                 "dex/semantic-layers/overview",
                 "dex/semantic-layers/ossie",
                 "dex/semantic-layers/cube",
-                "dex/semantic-layers/databricks-metric-views"
+                "dex/semantic-layers/databricks-metric-views",
+                "dex/semantic-layers/snowflake-semantic-views"
               ]
             },
             {

@@ -19,6 +19,7 @@ Choose a command, then expand its usage and options. Every command here also acc
 | [`dex semantic slayer`](#dex-semantic-slayer) | plan whole-file edits to the configured SLayer model files |
 | [`dex semantic cube`](#dex-semantic-cube) | plan whole-file edits to the configured Cube model files |
 | [`dex semantic databricks`](#dex-semantic-databricks) | plan whole-file edits to the Metric View YAML files |
+| [`dex semantic snowflake`](#dex-semantic-snowflake) | plan whole-file edits to the Semantic View YAML files |
 
 ## dex semantic define
 
@@ -211,6 +212,31 @@ dex semantic databricks [--edits-file FILE] [--from-ossie FILE]
 
 </Accordion>
 
+## dex semantic snowflake
+
+Validate whole Snowflake Semantic View YAML files at the paths semantic.snowflake.files configures, with dex's port of Snowflake's specification and validation rules, then store a plan. Needs the [semantic-views] extra. Never deploys a view and opens no Snowflake connection. Repo-only.
+
+<Accordion title="Usage and options for dex semantic snowflake">
+
+```text
+dex semantic snowflake [--edits-file FILE] [{define,update,plan}] [<intent>]
+```
+
+**Arguments**
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `[{define,update,plan}]` | define new documents, update existing ones, or plan a mix |  |
+| `[<intent>]` | one line saying what the change is for |  |
+
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--edits-file FILE` | whole-document edits payload as JSON; '-' reads stdin |  |
+
+</Accordion>
+
 Every command here also accepts the [global options](/dex/cli/overview#global-options).
 
-Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.17.8/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.
+Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.17.9/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.
