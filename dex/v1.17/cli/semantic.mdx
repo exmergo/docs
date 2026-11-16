@@ -1,0 +1,248 @@
+---
+noindex: true
+title: dex semantic
+sidebarTitle: semantic
+description: 'Reference for dex semantic: define, update, and plan dbt semantic models or native Apache Ossie documents as reviewable diffs, with every flag documented.'
+og:title: dex semantic · Exmergo Dex
+twitter:title: dex semantic · Exmergo Dex
+---
+
+<Note>
+  You are reading the docs for dex v1.17 (v1.17.9). See the [latest version](/dex/cli/semantic).
+</Note>
+
+
+define dbt or native semantic layers as reviewable diffs
+
+Choose a command, then expand its usage and options. Every command here also accepts the [global options](/dex/v1.17/cli/overview#global-options).
+
+| Command | What it does |
+| --- | --- |
+| [`dex semantic define`](#dex-semantic-define) | plan new dbt semantic models or metrics |
+| [`dex semantic update`](#dex-semantic-update) | plan changes to existing semantic definitions |
+| [`dex semantic plan`](#dex-semantic-plan) | plan a mix of semantic additions, changes and removals |
+| [`dex semantic ossie`](#dex-semantic-ossie) | plan whole-document edits to a native Apache Ossie layer |
+| [`dex semantic slayer`](#dex-semantic-slayer) | plan whole-file edits to the configured SLayer model files |
+| [`dex semantic cube`](#dex-semantic-cube) | plan whole-file edits to the configured Cube model files |
+| [`dex semantic databricks`](#dex-semantic-databricks) | plan whole-file edits to the Metric View YAML files |
+| [`dex semantic snowflake`](#dex-semantic-snowflake) | plan whole-file edits to the Semantic View YAML files |
+
+## dex semantic define
+
+Validate new semantic models or metrics, including with dbt's own parser, and store them as a plan. Refuses a removal. Repo-only.
+
+<Accordion title="Usage and options for dex semantic define">
+
+```text
+dex semantic define [--edits-file FILE] [--definitions-file FILE] [--no-parse]
+    [<intent>]
+```
+
+**Arguments**
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `[<intent>]` | one line saying what the change is for |  |
+
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--edits-file FILE` | whole-file edits payload as JSON; '-' reads stdin |  |
+| `--definitions-file FILE` | definitions written in place, as JSON; '-' reads stdin |  |
+| `--no-parse` | skip validation with dbt's own parser |  |
+
+</Accordion>
+
+## dex semantic update
+
+Validate changed semantic definitions, removals included, and store them as a plan. Repo-only.
+
+<Accordion title="Usage and options for dex semantic update">
+
+```text
+dex semantic update [--edits-file FILE] [--definitions-file FILE] [--no-parse]
+    [<intent>]
+```
+
+**Arguments**
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `[<intent>]` | one line saying what the change is for |  |
+
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--edits-file FILE` | whole-file edits payload as JSON; '-' reads stdin |  |
+| `--definitions-file FILE` | definitions written in place, as JSON; '-' reads stdin |  |
+| `--no-parse` | skip validation with dbt's own parser |  |
+
+</Accordion>
+
+## dex semantic plan
+
+Validate a payload of semantic definitions and classify each as defined, updated, unchanged or removed, then store a plan. Repo-only.
+
+<Accordion title="Usage and options for dex semantic plan">
+
+```text
+dex semantic plan [--edits-file FILE] [--definitions-file FILE] [--no-parse]
+    [<intent>]
+```
+
+**Arguments**
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `[<intent>]` | one line saying what the change is for |  |
+
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--edits-file FILE` | whole-file edits payload as JSON; '-' reads stdin |  |
+| `--definitions-file FILE` | definitions written in place, as JSON; '-' reads stdin |  |
+| `--no-parse` | skip validation with dbt's own parser |  |
+
+</Accordion>
+
+## dex semantic ossie
+
+Validate whole Ossie documents at the paths semantic.ossie.files configures, then store a plan. `--from-metric-view` proposes the document from a Metric View file through dex's port of apache/ossie-converters. Needs the [ossie] extra. Repo-only.
+
+<Accordion title="Usage and options for dex semantic ossie">
+
+```text
+dex semantic ossie [--edits-file FILE] [--from-metric-view FILE]
+    [--name MODEL] [--dataset-metrics] [--into PATH] [{define,update,plan}]
+    [<intent>]
+```
+
+**Arguments**
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `[{define,update,plan}]` | define new documents, update existing ones, or plan a mix |  |
+| `[<intent>]` | one line saying what the change is for |  |
+
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--edits-file FILE` | whole-document edits payload as JSON; '-' reads stdin |  |
+| `--from-metric-view FILE` | propose the Ossie documents from these Metric Views |  |
+| `--name MODEL` | the model and fact dataset name |  |
+| `--dataset-metrics` | write fact-only measures as dataset metrics |  |
+| `--into PATH` | output path (default: beside the configured files) |  |
+
+</Accordion>
+
+## dex semantic slayer
+
+Validate whole SLayer model files at the paths semantic.slayer.models configures, with SLayer's own model, then store a plan. Needs the [slayer] extra. Repo-only.
+
+<Accordion title="Usage and options for dex semantic slayer">
+
+```text
+dex semantic slayer [--edits-file FILE] [{define,update,plan}] [<intent>]
+```
+
+**Arguments**
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `[{define,update,plan}]` | define new documents, update existing ones, or plan a mix |  |
+| `[<intent>]` | one line saying what the change is for |  |
+
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--edits-file FILE` | whole-document edits payload as JSON; '-' reads stdin |  |
+
+</Accordion>
+
+## dex semantic cube
+
+Validate whole plain-YAML Cube model files at the paths semantic.cube.files configures, with dex's port of Cube's model rules, then store a plan. Needs the [cube] extra. No Cube server, no warehouse. Repo-only.
+
+<Accordion title="Usage and options for dex semantic cube">
+
+```text
+dex semantic cube [--edits-file FILE] [{define,update,plan}] [<intent>]
+```
+
+**Arguments**
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `[{define,update,plan}]` | define new documents, update existing ones, or plan a mix |  |
+| `[<intent>]` | one line saying what the change is for |  |
+
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--edits-file FILE` | whole-document edits payload as JSON; '-' reads stdin |  |
+
+</Accordion>
+
+## dex semantic databricks
+
+Validate whole Metric View YAML files at the paths semantic.databricks.files configures, with dex's port of the Metric View YAML 1.1 rules, then store a plan. `--from-ossie` proposes the view from an Ossie document through dex's port of apache/ossie-converters. Needs the [metric-views] extra. Never deploys a view and opens no workspace connection. Repo-only.
+
+<Accordion title="Usage and options for dex semantic databricks">
+
+```text
+dex semantic databricks [--edits-file FILE] [--from-ossie FILE]
+    [--fact DATASET] [--into PATH] [{define,update,plan}] [<intent>]
+```
+
+**Arguments**
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `[{define,update,plan}]` | define new documents, update existing ones, or plan a mix |  |
+| `[<intent>]` | one line saying what the change is for |  |
+
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--edits-file FILE` | whole-document edits payload as JSON; '-' reads stdin |  |
+| `--from-ossie FILE` | propose the Metric View from these Ossie documents |  |
+| `--fact DATASET` | the dataset the view is on (several roots) |  |
+| `--into PATH` | output path (default: beside the configured files) |  |
+
+</Accordion>
+
+## dex semantic snowflake
+
+Validate whole Snowflake Semantic View YAML files at the paths semantic.snowflake.files configures, with dex's port of Snowflake's specification and validation rules, then store a plan. Needs the [semantic-views] extra. Never deploys a view and opens no Snowflake connection. Repo-only.
+
+<Accordion title="Usage and options for dex semantic snowflake">
+
+```text
+dex semantic snowflake [--edits-file FILE] [{define,update,plan}] [<intent>]
+```
+
+**Arguments**
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `[{define,update,plan}]` | define new documents, update existing ones, or plan a mix |  |
+| `[<intent>]` | one line saying what the change is for |  |
+
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--edits-file FILE` | whole-document edits payload as JSON; '-' reads stdin |  |
+
+</Accordion>
+
+Every command here also accepts the [global options](/dex/v1.17/cli/overview#global-options).
+
+Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.17.9/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.

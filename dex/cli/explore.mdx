@@ -199,9 +199,9 @@ Discover the semantic layer's metrics, dimensions and entities (list), read one 
 
 ```text
 dex explore semantic [--metric METRICS] [--for-dimension DIMENSIONS]
-    [--search TERM] [--full] [--group-by DIMENSIONS] [--where FILTER]
-    [--order-by COLUMNS] [--grain GRAIN] [--limit N] [--local] [--api]
-    [{list,values,query}] [<name> ...]
+    [--search TERM] [--full] [--deployed] [--group-by DIMENSIONS]
+    [--where FILTER] [--order-by COLUMNS] [--grain GRAIN] [--limit N]
+    [--local] [--api] [{list,values,query}] [<name> ...]
 ```
 
 **Arguments**
@@ -219,6 +219,7 @@ dex explore semantic [--metric METRICS] [--for-dimension DIMENSIONS]
 | `--for-dimension DIMENSIONS` | list mode: metrics groupable by all these dimensions |  |
 | `--search TERM` | list mode: match names, labels and descriptions |  |
 | `--full` | list mode: lift the catalog's payload caps |  |
+| `--deployed` | list mode: read the deployed definitions instead |  |
 | `--group-by DIMENSIONS` | query mode: dimensions to group by, comma-separated |  |
 | `--where FILTER` | query mode: a filter in the layer's own dialect |  |
 | `--order-by COLUMNS` | query mode: columns to order by, comma-separated |  |
@@ -231,4 +232,4 @@ dex explore semantic [--metric METRICS] [--for-dimension DIMENSIONS]
 
 Every command here also accepts the [global options](/dex/cli/overview#global-options).
 
-Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.17.9/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.
+Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.18.0/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.

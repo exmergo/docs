@@ -325,6 +325,10 @@ dex transform apply [plan-id]     -> write diffs into the dbt project (a reviewa
                                      Co-authored-by line the commit of those files ends with;
                                      data.refactor_comparison reports each rewritten model's recorded
                                      comparison verdict or not_compared, never enforced
+                                     A stored plan with an undeclared population change is refused
+                                     (reason: request, data.undeclared_population_changes) until an
+                                     assumption records it or --accept-population-change "<reason>"
+                                     accepts it, recorded on the plan (#1230)
 dex transform plans               -> list stored plans, pending and applied, newest first
 dex transform references <name>   -> where each name is used: model SQL, schema.yml, dbt_project.yml,
   [more...] [--kind K] [--full]      macros, semantic YAML, seed headers, installed packages. Repo-only
@@ -454,6 +458,18 @@ dex transform build --target dev  -> cost preflight FIRST; runs only with --conf
                                      stale, failed and not_run are all distinguishable from
                                      validated. A node status outside dbt's known words is
                                      indeterminate: never built, never validated, not a failure.
+                                     built_unverified replaces validated where a named plan left
+                                     part of the change open (data.completion.unverified, #1230);
+                                     data.evidence.outcome keeps validated. With --verify and a plan,
+                                     findings carry attribution (introduced, unattributed, existing),
+                                     introduced first, judged against the last --verify build before
+                                     the plan was applied (data.verification.introduced, .attribution).
+                                     With --verify and a plan, the models the plan rewrote and every
+                                     unedited model below them are re-executed against the tree before
+                                     the plan (rows, keys kept/removed/added, a mart's changed columns;
+                                     counts only) under data.verification.impact and
+                                     data.completion.impact, largest change first (#1231); an unedited
+                                     model whose rows or keys moved is downstream_population_changed
                                      data.evidence carries the invocation, typed per-node statuses,
                                      the selection asked for against what it got, the manifest and
                                      run-results digests, the relations this run's successful nodes
@@ -735,11 +751,73 @@ dex maintain verify [<models>]    -> is the project correct right now, no .dex/s
                                      column accounts for is satisfied, its counts kept, with
                                      unmatched_accounted_for naming the entry; #1162),
                                      join_field_all_null and join_field_newly_null
-                                     for a column the join supplies that came back all NULL. A project that fails
+                                     for a column the join supplies that came back all NULL. A project
+                                     format with no dbt artifacts has each declared foreign key measured
+                                     against its parent, placed through model_relations, one
+                                     data.foreign_key_coverage record per key (model, column, to_model,
+                                     to_column; satisfied, contradicted, not_applicable, or unchecked
+                                     with a reason_code), foreign_key_orphans for any non-NULL value the
+                                     parent lacks (#1197); dbt judges these through its own
+                                     relationships tests. A project that fails
                                      to compile is reported first and suppresses every other check;
                                      data.suppressed names each finding class that did not run and why,
                                      declared-fact classes (unit, additivity, population,
                                      parent_population, temporal) included
+dex maintain coverage [<names>] [--full] [--mutate [--max-models N] [--target <t>]]
+                                  -> which project resources the dbt tests reach (#1280). Free and
+                                     connectionless on every connector: the manifest comes from a dbt
+                                     parse of a throwaway copy of the project, no baseline required.
+                                     Sections models, sources, snapshots and seeds hold the root
+                                     project's enabled resources (ephemeral models marked); package and
+                                     disabled resources, disabled tests and tests on them are counted and
+                                     named under excluded. Per resource: own tests by kind (generic,
+                                     singular, unit, freshness) with each data test's severity,
+                                     downstream_tests apart (never own coverage; unit tests excluded),
+                                     an incremental model's incremental_branch_tests (unit tests that
+                                     override is_incremental to true), and columns: documented,
+                                     asserted (a generic test attached), unasserted, and
+                                     undocumented_tested (listed, never counted). A generic test is
+                                     named by the test it applies and its column, never by its node
+                                     name, which can carry its arguments. data.summary leads: each
+                                     ratio is {numerator, denominator, of}, never one blended number.
+                                     Selector as on maintain verify, plus source.table, snapshots and
+                                     seeds. Capped (25 resources per section, untested first; 12 tests
+                                     and 12 column names per resource; 10 downstream names; 25
+                                     excluded), every cut in data.elided and notes; --full lifts them.
+                                     A project that does not parse is reported first and suppresses the
+                                     inventory; with no parse possible the newest manifest on disk is
+                                     read and dated (data.manifest.source: artifact). Separate
+                                     sections, never blended: each test's last_run status from the
+                                     newest building run_results.json (not_run where it did not run;
+                                     data.last_run names the invocation and its age) (#1285); each
+                                     model's strength, its recorded transform test --mutate score
+                                     called fresh, stale (with what changed), missing or untestable,
+                                     summarized as counts and score bands (#1284); and declarations,
+                                     one record per declared fact with checked_by dbt_test,
+                                     dex_verify, both, none or prose (#1283), each naming its
+                                     source: dbt, or a native semantic layer's vendor, whose keys
+                                     and joins maintain grain judges and whose dex metadata nothing
+                                     checks; a fact both declare on one relation is counted once
+                                     (#1346). Columns a singular test
+                                     reads are columns.referenced_columns (roles: predicate, join,
+                                     aggregation, grouping, projection; the tests that read them),
+                                     counted as referenced and referenced_only and summarized as
+                                     columns_referenced_only, never added to asserted (#1282); a test
+                                     is rendered statically, or read from a compiled manifest on disk
+                                     holding it with the same checksum, and data.singular_tests names
+                                     each test read in part or not at all with a reason_code. All
+                                     free. --mutate refreshes every stale and missing score (#1284):
+                                     transform test --mutate per model, in selector order (else
+                                     missing first, upstream first), at most 25 per run (--max-models
+                                     narrows, never widens; the rest named under refresh.elided),
+                                     priced and confirmed once for the batch on a metered connector,
+                                     a budget that runs out leaving the rest under refresh.not_run
+                                     (reason_code budget); Python, sql_header and versioned models
+                                     are refresh.skipped for free; a model with no SQL to plant a
+                                     defect in is recorded and reads untestable (reason
+                                     no_mutable_sql) until it changes. Dev target only; refused in
+                                     values-free mode. Report only: status ok whatever the coverage.
+                                     Reviewed for values-free mode without --mutate
 ```
 
 ### How authored content reaches the engine
@@ -853,7 +931,7 @@ each selected model does not yet declare, lays the supplied `declarations` over
 them field by field, and stores the lot as one capped plan, naming every model it
 skipped and why. The full shape, the refusals and
 what each field renders into:
-[`skills/transform/references/declarations.md`](https://github.com/exmergo/dex/blob/v1.17.9/skills/transform/references/declarations.md).
+[`skills/transform/references/declarations.md`](https://github.com/exmergo/dex/blob/v1.18.0/skills/transform/references/declarations.md).
 
 `kind` is one of `model_sql`, `schema_yml`, `semantic_yml` (optional on
 `semantic define|update`, which imply `semantic_yml`), `packages_yml`,
@@ -1287,7 +1365,11 @@ default, or a filter or operator after it is refused. A key naming a location
 - `transform apply [plan-id]` re-hashes every file first. A file edited by a
   human after the plan was made is a **conflict**: nothing is written, the
   divergence is returned as diffs with `needs_confirmation`, and only an explicit
-  `--confirm` overrides it. An apply is all-or-nothing across the whole plan: one
+  `--confirm` overrides it. A stored plan whose change scope records an
+  undeclared population change is refused before anything is hashed (#1230),
+  naming each change under `data.undeclared_population_changes`; an assumption
+  naming its column, or `--accept-population-change "<reason>"` recorded on the
+  plan, settles it. An apply is all-or-nothing across the whole plan: one
   conflict refuses the set, so the clean edits beside it do not land either. The
   stored paths are re-checked against the project format's editing surface at the
   same time, and a path outside it is refused outright rather than surfaced for
@@ -1394,7 +1476,16 @@ default, or a filter or operator after it is refused. A key naming a location
   differently. `indeterminate` is a run where nothing failed and a node reported a
   status dex does not recognize (`partial success`, `no-op`): such a node is never
   counted as built and never read as a pass, and a required one is listed under
-  `data.completion.deliverables.unrecognized`. `data.evidence` is where the
+  `data.completion.deliverables.unrecognized`. `built_unverified` (#1230) is
+  `validated` with part of a named change still open, each reason under
+  `data.completion.unverified`: a rewrite applied uncompared while its baseline
+  was ready, an undeclared population change apply did not accept, or a
+  high-severity finding the plan introduced (or, with no baseline, one on a
+  model it edited), or an unedited model below the plan's edits whose rows or
+  keys moved with nothing recording that population (#1231). It is set on
+  `data.outcome` and `data.completion.outcome`;
+  `data.evidence.outcome` keeps `validated`, since a host recomputes that one
+  from the evidence alone. `data.evidence` is where the
   reasoning lives: the dbt invocation, per-node status and materialization and
   relation, what the selection asked for against what it matched, the manifest
   and run-results digests, the relations the run's successful nodes generated
@@ -2033,8 +2124,14 @@ table's dimensions and those its relationships reach many-to-one, so
 relationship referencing it a foreign declaration; every primary and unique key
 and every key-equality relationship, with its arity, reach `explore` through the
 declaration channel at confidence 1.0. `sample_values` are counted and never
-surfaced. `query` and `values` refuse by name until #1290, `values` after the PII
-gate. `maintain snapshot` records `vendor: snowflake` and dex's own rule-set
+surfaced. `query` and `values` are governed (#1290): Dex renders `SELECT * FROM
+SEMANTIC_VIEW(<deployed view> DIMENSIONS ... METRICS ... [WHERE ...])` from the
+catalog and runs it through the Snowflake connector under the cost guard, after
+translation refusals, the PII gate, and a warehouse-free deployed-definition check that
+locates the view with `SHOW SEMANTIC VIEWS` and refuses one whose read-back
+(`SYSTEM$READ_YAML_FROM_SEMANTIC_VIEW`) differs from the repository on what the
+query relies on; `list --deployed` reads the deployed views instead, with
+per-view `coverage`. `maintain snapshot` records `vendor: snowflake` and dex's own rule-set
 revision as `format_version` (the format has no `version` key), over a canonical
 form, so a view read back from Snowflake fingerprints as its file; the
 layer-neutral axes read it: definition drift on the semantic axis, each key and
@@ -2616,4 +2713,4 @@ Because every skill, test, and benchmark depends on it, the contract was locked
 before the engine logic was built, and the subcommands fill in against this
 fixed boundary. Exploration, authoring, and maintenance are live today.
 
-Source: [`references/command-contract.md`](https://github.com/exmergo/dex/blob/v1.17.9/references/command-contract.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/command-contract.md)). This page is generated; change the source, not the site.
+Source: [`references/command-contract.md`](https://github.com/exmergo/dex/blob/v1.18.0/references/command-contract.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/command-contract.md)). This page is generated; change the source, not the site.

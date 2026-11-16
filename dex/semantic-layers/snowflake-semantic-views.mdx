@@ -1,7 +1,7 @@
 ---
 title: Snowflake Semantic View compatibility
 sidebarTitle: Snowflake Semantic Views
-description: 'How dex reads Snowflake Semantic View YAML with no Snowflake connection: rules qualified against verify_only, the catalog mapping and what it declines to claim.'
+description: How dex reads Semantic View YAML from the repository or the account alone, queries the deployed view through SEMANTIC_VIEW(), and what it declines.
 og:title: Snowflake Semantic View compatibility · Exmergo Dex
 twitter:title: Snowflake Semantic View compatibility · Exmergo Dex
 ---
@@ -42,10 +42,12 @@ rather than as every definition changing.
 |---|---|---|
 | `config validate` and `config get` on a `semantic.snowflake` block | none | always available |
 | reading the layer: `explore semantic list`, `--use-project`, `maintain` | `[semantic-views]`, the dialect engine (every connector extra already carries it) | refused by name, `reason: prerequisite` |
+| a governed `explore semantic query` or `values`, `list --deployed`, and every `explore semantic` command under `semantic.deployment: snowflake_account` | `[semantic-views]` and `[snowflake]`, the warehouse connector | refused by name |
 
-Reading the layer installs no Snowflake package and opens no Snowflake
-connection. The `[snowflake]` extra is the warehouse connector, which only a
-governed query (#1290) will need.
+Reading the repository's files installs no Snowflake package and opens no
+Snowflake connection. The `[snowflake]` extra is the warehouse connector, which
+only a governed query, a values read, `list --deployed`, and a catalog read from
+the account (`snowflake_account`) need.
 
 ## The YAML document is read; the DDL is not
 
@@ -207,14 +209,133 @@ The catalog's declared gaps:
 - `model_ref` and `agg_time_dimension`
 - an entity's label and description
 
-## `query` and `values` are not available yet
+## `query` and `values`: Dex renders, Snowflake executes (#1290)
 
-A governed Semantic View query is a `SEMANTIC_VIEW(...)` clause rendered by Dex
-and executed through the Snowflake connector under the cost guard (#1290). Until
-then `explore semantic query` refuses by name. `explore semantic values` resolves
-the token and runs the values PII gate first, so a personal dimension is refused
-as PII before it is refused for want of a runtime. Profile the relations the
-catalog names with `explore profile` instead.
+A governed query is a `SEMANTIC_VIEW(...)` clause Dex renders from the catalog
+and executes through its own Snowflake connector, under the cost guard
+(`execution: dex`). Every other connector is refused by name.
+
+| Request | What Dex does |
+|---|---|
+| `query sales.orders.revenue --group-by sales.customers.segment` | `SELECT * FROM SEMANTIC_VIEW("DB"."SCH"."SALES" DIMENSIONS customers.segment AS "c0" METRICS orders.revenue AS "c1") LIMIT 51`, result columns named by the tokens |
+| a view-level metric (`sales.revenue_per_customer`) | `METRICS revenue_per_customer`, groupable by what all its inputs share |
+| `--group-by sales.orders.order_date__month` | `DATE_TRUNC('month', orders.order_date)` in `DIMENSIONS`, on a time dimension or one with a temporal `data_type`, at `second` through `year` |
+| `--where "orders.status = 'F'"` | a Snowflake predicate over `table.member` or `view.table.member` dimensions and facts, re-rendered by sqlglot and placed inside the clause |
+| `--group-by sales.orders.total_price` and no metric | `FACTS orders.total_price`: a query of facts alone |
+| `--order-by=-sales.orders.revenue`, `--limit 10` | `ORDER BY` and `LIMIT` outside the clause, over the query's own tokens |
+| `values sales.customers.segment [--metric m]` | a `DIMENSIONS`-only clause, or one with `METRICS m` projecting the dimension alone; `scoped_to` names the metric |
+
+Refused before anything is sent, each by name:
+- facts with metrics (Snowflake refuses the combination), and facts with
+  dimensions (refused from Snowflake's 2026_07 behaviour change on). Checked
+  live with the bundle enabled: Snowflake answers "Querying FACTS with
+  DIMENSIONS in a semantic view is not supported" for a dimension on the fact's
+  own table too, at compile time, with no warehouse resumed;
+- a private member as a query member or in `--where`;
+- a window metric, a level-of-detail member, a member naming
+  `using_relationships`, or a metric reading one of them; a view declaring
+  `variables`;
+- a dimension (grouped or filtered) whose table the metric's table does not
+  reach many-to-one through one unambiguous path, which Snowflake refuses as
+  `Invalid dimension specified`; the check reads the catalog's groupable list;
+- a grain on a dimension that is not temporal, and a bare `--grain`;
+- a `--where` naming a metric, or one Dex cannot read (a subquery, an
+  aggregate, a window, a placeholder, an unqualified name);
+- tokens from two views, and a query spanning views;
+- a PII dimension, filter or value-returning metric input, through the
+  catalog's lineage.
+
+**The deployed view must match the repository.** Before the cost handshake:
+1. `SHOW SEMANTIC VIEWS` over the source allowlist finds the view by name
+   (no warehouse). None found is refused as defined only in the repository, since Dex
+   never deploys; two found are refused as ambiguous, and `--scope` narrows.
+2. `SYSTEM$READ_YAML_FROM_SEMANTIC_VIEW` reads it back. Checked on a suspended
+   warehouse: it stayed suspended, so the read bills no warehouse time
+   (it uses cloud services, which Snowflake bills only past the daily
+   allowance).
+3. Each member the query names, every metric those read, and the base table,
+   keys and relationships of each table reached, are compared: kind,
+   expression (parsed, identifiers folded), access modifier,
+   `non_additive_dimensions` and `using_relationships`. Any difference refuses
+   the query, naming the member and the field. A member the query does not rely
+   on may differ.
+
+What Snowflake changes on read-back is normalization, never a difference, and
+the 15 read-backs in the corpus compare clean against the files they came from:
+upper-cased names, `access_modifier` written out, a re-inferred `data_type`, and
+an empty `synonyms` and `description` on a view-level metric.
+
+**Pricing.** Snowflake keeps no bytes for a semantic view, so a statement over
+one would be quoted at the per-statement floor. Dex prices it from the base
+tables of every logical table the rendered members reach. A base table outside
+the source allowlist (or the `--scope` it was narrowed to) has no size dex may
+read, so a query reaching one is refused by name rather than quoted as nothing.
+
+**`list --deployed`** reads the views deployed from the configured files, with
+`source: deployed` and per-view `coverage`: `full`, `limited` (a private member
+the role could not read back, which then refuses any query relying on it) or
+`refused` (not deployed, ambiguous, or unreadable). A plain `list` never contacts
+Snowflake. On the dogfood account a role holding only SELECT on the view, with
+secondary roles off, read every private member back, so `limited` guards a
+behaviour Snowflake does not show today.
+
+## The account alone: `semantic.deployment: snowflake_account` (#1357)
+
+With `snowflake_account`, the catalog is read from the account, and no repository
+file is needed. It is the Snowflake counterpart of a hosted dbt Cloud layer, read
+by `explore` only.
+
+1. `SHOW SEMANTIC VIEWS` per allowlisted scope lists every view (no warehouse).
+2. `SYSTEM$READ_YAML_FROM_SEMANTIC_VIEW` reads each one back (cloud services, no
+   warehouse). `query` and `values` read back only the view their tokens name.
+3. Each read-back is validated by the reader that reads a file, with every rule
+   above. A read-back that does not validate is `refused` in `coverage`, with
+   the reader's diagnostics as its reasons.
+
+What is the same as under `local`: the render, the refusals before anything
+billed is sent, the PII gate through the catalog's lineage, pricing from the base
+tables, the allowlist as a cost boundary, and execution through Dex's own
+Snowflake connector (`execution: dex`).
+
+What is different:
+
+| | `local` | `snowflake_account` |
+|---|---|---|
+| Where the catalog comes from | the configured files | every semantic view in the source allowlist's scopes |
+| The deployed view, before a query | held to the file; any difference refuses | held to nothing: the account is the source of truth |
+| Said on every result | nothing extra | a warning that the definitions were read from the account and not checked against a reviewed file; `source: account` on the catalog, `definition_source: account` on a query or values result |
+| A configured file for the same view | is the definition | named on the view (`repository_file` in `coverage`, a note on each query or values result), never compared; `--local` holds the deployment to it |
+| Names | the file's spelling | the file's spelling where a configured file describes the view, else Snowflake's (an unquoted name comes back upper-cased); tokens match ignoring case |
+| `coverage: limited` | a private member of the file the role could not read back | also a read-back that reads a member it does not carry; a query relying on one is refused |
+| A name in two allowlisted scopes | refused when queried | `refused` in `coverage` for each copy, naming both and `--scope` |
+| The PII gate | before anything is sent | after the free read-back, before any warehouse statement: a token resolves only against the account's definitions |
+| `maintain`, `transform`, `--use-project` | the files | the files, where configured; with none, each says so instead of reporting a clean layer |
+| `explore relationships` and `explore map` with `--use-hosted-semantic-layer` | refused (no hosted read) | folds the account's keys and relationships in, on the base tables they join |
+
+`--deployed` changes nothing here, and `--api` is refused: Dex executes, so there
+is no vendor execution to switch to.
+
+## What this release does not do
+
+- **The account as a maintain or transform source.** `maintain` and `transform`
+  read no account layer (#1357 is explore only), and a deployed view is not
+  adopted into the repository as a file.
+- **DDL and dbt models.** A `CREATE SEMANTIC VIEW` file and a
+  `dbt_semantic_view` model are refused by name; only the YAML specification is
+  read and authored (#1298).
+- **The Ossie bridge.** Neither Snowflake's Ossie procedures nor a converter
+  are in the path (#1297).
+- **Deployment.** Dex never creates, replaces or drops a semantic view, and
+  never calls `SYSTEM$CREATE_SEMANTIC_VIEW_FROM_YAML`. Applying a plan writes the
+  file; a maintainer runs `verify_only` and deploys it.
+- **Cortex Analyst.** No natural-language request, and the Cortex Analyst keys
+  (`verified_queries`, `custom_instructions`, ...) are carried, never acted on.
+- **Query forms.** The standard-SQL form (`SELECT AGG(metric) FROM sv`), a
+  query spanning views, and window, `variables`, level-of-detail and
+  `using_relationships` members are not rendered.
+- **Carried, not modelled.** Window metrics, `NON ADDITIVE BY`, ASOF and range
+  relationships, filters and `variables` are named in the catalog rather than
+  modelled, and `sample_values` is counted, never surfaced.
 
 ## Deployed semantic views and the warehouse
 
@@ -315,7 +436,10 @@ deploys: nothing runs `CREATE SEMANTIC VIEW` or
 `SYSTEM$CREATE_SEMANTIC_VIEW_FROM_YAML`, nothing grants a privilege, and no
 authoring path opens a Snowflake connection. Check a file with
 `SYSTEM$CREATE_SEMANTIC_VIEW_FROM_YAML('<database>.<schema>', $$ <file> $$, TRUE)`
-(verify_only) before you deploy it yourself.
+(verify_only) before you deploy it yourself. Both need SELECT on every
+`base_table` the file names, so a logical table derived from a dbt mart needs
+the deploying role to read the table the build created, which the role dbt
+builds as owns.
 
 - **The write surface** is exactly `semantic.snowflake.files`. A path off it, a
   `.sql` file and another suffix are refused by name, the first with the
@@ -372,4 +496,24 @@ corpus and what a maintainer deploys to a scratch schema with
 `verify_only` needs a running warehouse and resumes it, so each verify run bills
 at least a warehouse resume.
 
-Source: [`references/snowflake-semantic-views-compatibility.md`](https://github.com/exmergo/dex/blob/v1.17.9/references/snowflake-semantic-views-compatibility.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/snowflake-semantic-views-compatibility.md)). This page is generated; change the source, not the site.
+## Qualified live
+
+`packages/dex-core/tests/integration/test_snowflake_semantic_views.py` runs in
+the Snowflake integration job. It deploys `valid/star.yaml` and
+`valid/derived_metrics.yaml` over `SNOWFLAKE_SAMPLE_DATA.TPCH_SF1` into a
+scratch schema, under a deployer role kept apart from the identity Dex runs as
+(`scripts/setup_snowflake_ci.sh`), and holds Dex to:
+- the read-back of each view comparing clean with its file, and
+  `list --deployed` reporting `full` coverage for both;
+- a metric by a dimension, a view-level metric by a joined dimension, a
+  grain-suffixed time dimension, a filtered query and a metric-scoped `values`,
+  each equal to SQL written by hand over the base tables;
+- a repository edited away from its deployment, refused before the cost
+  handshake, with nothing reaching the spend ledger;
+- with `semantic.deployment: snowflake_account` and no file, `list` finding both
+  views at `full` coverage, and every query and values case above equal to the
+  same hand-written SQL;
+- the `maintain` loop on a table the test creates: a dropped column found as
+  `declared_column_missing`, cut by `maintain reconcile`, applied, and clean.
+
+Source: [`references/snowflake-semantic-views-compatibility.md`](https://github.com/exmergo/dex/blob/v1.18.0/references/snowflake-semantic-views-compatibility.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/snowflake-semantic-views-compatibility.md)). This page is generated; change the source, not the site.

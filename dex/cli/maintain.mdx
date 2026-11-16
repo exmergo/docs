@@ -20,6 +20,7 @@ Choose a command, then expand its usage and options. Every command here also acc
 | [`dex maintain semantic`](#dex-maintain-semantic) | detect semantic definition drift and dangling references |
 | [`dex maintain reconcile`](#dex-maintain-reconcile) | propose the edits that reconcile detected drift |
 | [`dex maintain verify`](#dex-maintain-verify) | check the project is correct now, with no baseline |
+| [`dex maintain coverage`](#dex-maintain-coverage) | inventory the tests the dbt project declares |
 
 ## dex maintain snapshot
 
@@ -171,6 +172,34 @@ dex maintain verify [--target TARGET] [<object> ...]
 
 </Accordion>
 
+## dex maintain coverage
+
+Count each model's, source's, snapshot's and seed's own tests by kind, its downstream tests, incremental branch tests and asserted columns, each against a stated denominator; each test's last run status, each model's recorded mutation score (fresh or stale), the columns singular tests read, and what checks each declared fact. Free; reads the manifest, run results and .dex/ only. `--mutate` refreshes stale and missing scores in one batch, behind one cost handshake.
+
+<Accordion title="Usage and options for dex maintain coverage">
+
+```text
+dex maintain coverage [--full] [--mutate] [--max-models N] [--target TARGET]
+    [<object> ...]
+```
+
+**Arguments**
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `[<object> ...]` | model, source.table, snapshot or seed names (default: all) |  |
+
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--full` | lift the caps on every listed section and name |  |
+| `--mutate` | refresh stale and missing mutation scores |  |
+| `--max-models N` | refresh at most N models (25, never more) |  |
+| `--target TARGET` | dbt dev target `--mutate` runs against; prod-looking targets are refused |  |
+
+</Accordion>
+
 Every command here also accepts the [global options](/dex/cli/overview#global-options).
 
-Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.17.9/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.
+Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.18.0/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.

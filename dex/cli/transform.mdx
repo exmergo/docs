@@ -92,7 +92,8 @@ Write a plan's diffs into the project. With no id, applies the latest unapplied 
 <Accordion title="Usage and options for dex transform apply">
 
 ```text
-dex transform apply [--plan-file FILE] [--expect-digest HEX] [<plan-id>]
+dex transform apply [--plan-file FILE] [--expect-digest HEX]
+    [--accept-population-change REASON] [<plan-id>]
 ```
 
 **Arguments**
@@ -107,6 +108,7 @@ dex transform apply [--plan-file FILE] [--expect-digest HEX] [<plan-id>]
 | --- | --- | --- |
 | `--plan-file FILE` | apply an exported plan document instead of a stored plan |  |
 | `--expect-digest HEX` | refuse a plan document whose digest is not this one |  |
+| `--accept-population-change REASON` | apply an undeclared population change, stating why |  |
 
 </Accordion>
 
@@ -466,4 +468,4 @@ dex transform preflight [--target TARGET]
 
 Every command here also accepts the [global options](/dex/cli/overview#global-options).
 
-Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.17.9/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.
+Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.18.0/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.
