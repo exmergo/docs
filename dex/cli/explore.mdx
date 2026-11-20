@@ -28,7 +28,7 @@ Summarize the objects in scope from metadata. `--rank` orders them by what matte
 <Accordion title="Usage and options for dex explore inventory">
 
 ```text
-dex explore inventory [--rank] [--limit N] [--all]
+dex explore inventory [--rank] [--limit N] [--all] [--include-elementary]
 ```
 
 **Options**
@@ -38,6 +38,7 @@ dex explore inventory [--rank] [--limit N] [--all]
 | `--rank` | order objects by what matters, capped at 30 by default |  |
 | `--limit N` | widen the ranked list to N objects (with `--rank`) |  |
 | `--all` | lift the ranked list's cap (with `--rank`) |  |
+| `--include-elementary` | rank the Elementary package's own tables too (left out by default) |  |
 
 </Accordion>
 
@@ -102,6 +103,7 @@ Build or refresh the draft map in .dex/: the top-ranked objects with grain, keys
 ```text
 dex explore map [--full] [--detail] [--verify] [--infer-by-overlap]
     [--refresh] [--use-project] [--use-hosted-semantic-layer]
+    [--include-elementary]
 ```
 
 **Options**
@@ -115,6 +117,7 @@ dex explore map [--full] [--detail] [--verify] [--infer-by-overlap]
 | `--refresh` | re-profile even when the cached profile is fresh |  |
 | `--use-project` | fold in the project's declared joins, grain and semantics |  |
 | `--use-hosted-semantic-layer` | also read the configured hosted semantic layer's catalog |  |
+| `--include-elementary` | rank the Elementary package's own tables too (left out by default) |  |
 
 </Accordion>
 
@@ -232,4 +235,4 @@ dex explore semantic [--metric METRICS] [--for-dimension DIMENSIONS]
 
 Every command here also accepts the [global options](/dex/cli/overview#global-options).
 
-Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.18.0/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.
+Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.18.1/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.
