@@ -65,7 +65,7 @@ Validate the edits in `--edits-file`, diff them against the project, and store a
 
 ```text
 dex transform plan [--edits-file FILE] [--scaffold TABLE]
-    [--attribute-rows | --no-attribute-rows] [<intent>]
+    [--attribute-rows | --no-attribute-rows] [--no-parse] [<intent>]
 ```
 
 **Arguments**
@@ -82,6 +82,7 @@ dex transform plan [--edits-file FILE] [--scaffold TABLE]
 | `--scaffold TABLE` | add a staging model skeleton for a profiled table |  |
 | `--attribute-rows` | measure the row-population delta of each change |  |
 | `--no-attribute-rows` | name row-affecting changes without measuring them |  |
+| `--no-parse` | store the plan without running dbt: no parse, no compile |  |
 
 </Accordion>
 
@@ -468,4 +469,4 @@ dex transform preflight [--target TARGET]
 
 Every command here also accepts the [global options](/dex/cli/overview#global-options).
 
-Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.18.2/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.
+Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.18.3/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.
