@@ -12,7 +12,8 @@ set up a Dex project, adopt dbt, or explore without dbt
 dex init [--mode {new,demo,adopt,explore}] [--project-dir PROJECT_DIR]
     [--target TARGET] [--dev-destination DEV_DESTINATION]
     [--agent-file {AGENTS.md,CLAUDE.md}] [--no-agent-instructions]
-    [--no-interactive] [--layered-schemas] [--in-place] [<name>]
+    [--no-interactive] [--layered-schemas] [--in-place] [--no-elementary]
+    [<name>]
 ```
 
 **Arguments**
@@ -34,7 +35,8 @@ dex init [--mode {new,demo,adopt,explore}] [--project-dir PROJECT_DIR]
 | `--no-interactive` | return structured missing inputs without terminal questions |  |
 | `--layered-schemas` | build each dbt layer into its own schema |  |
 | `--in-place` | scaffold dbt in the current directory |  |
+| `--no-elementary` | leave the Elementary package out of the project or plan |  |
 
 Every command here also accepts the [global options](/dex/cli/overview#global-options).
 
-Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.18.3/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.
+Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.18.4/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.

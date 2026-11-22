@@ -45,6 +45,7 @@ bigquery:
     - bigquery-public-data.samples   # qualified names read another project
   location: EU                   # optional job-location override
   dev_dataset: dbt_dev           # where dbt dev builds write (never a source)
+  prod: analytics                # where models build in production (catalog metadata only)
   max_full_profile_bytes: null   # opt-in TABLESAMPLE threshold for huge tables
 budget:
   ceiling: 1000000000            # per-command bytes (1 GB); --budget overrides
@@ -302,4 +303,4 @@ dynamic (data-dependent) keys, the shape NoSQL-sourced CDC exports land in:
 The shipped `unpivot_json_object` macro (`transform macro unpivot_json_object`)
 bakes both fixes in; prefer it to hand-rolling this pattern.
 
-Source: [`references/bigquery.md`](https://github.com/exmergo/dex/blob/v1.18.3/references/bigquery.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/bigquery.md)). This page is generated; change the source, not the site.
+Source: [`references/bigquery.md`](https://github.com/exmergo/dex/blob/v1.18.4/references/bigquery.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/bigquery.md)). This page is generated; change the source, not the site.

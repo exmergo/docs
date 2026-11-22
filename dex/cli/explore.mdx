@@ -79,7 +79,7 @@ Infer join edges with confidences. `--verify` measures each join with an overlap
 
 ```text
 dex explore relationships [--verify] [--infer-by-overlap] [--refresh]
-    [--use-project] [--use-hosted-semantic-layer]
+    [--use-project] [--use-hosted-semantic-layer] [--include-elementary]
 ```
 
 **Options**
@@ -91,6 +91,7 @@ dex explore relationships [--verify] [--infer-by-overlap] [--refresh]
 | `--refresh` | re-profile even when the cached profile is fresh |  |
 | `--use-project` | fold in the project's declared joins, grain and semantics |  |
 | `--use-hosted-semantic-layer` | also read the configured hosted semantic layer's catalog |  |
+| `--include-elementary` | profile the Elementary package's own tables too (left out by default) |  |
 
 </Accordion>
 
@@ -128,7 +129,7 @@ Serialize the .dex/ map as a Mermaid erDiagram. Free and connectionless: it read
 <Accordion title="Usage and options for dex explore diagram">
 
 ```text
-dex explore diagram [--full]
+dex explore diagram [--full] [--include-elementary]
 ```
 
 **Options**
@@ -136,6 +137,7 @@ dex explore diagram [--full]
 | Option | Description | Default |
 | --- | --- | --- |
 | `--full` | draw every eligible object and column |  |
+| `--include-elementary` | draw the Elementary package's own tables too (left out by default) |  |
 
 </Accordion>
 
@@ -235,4 +237,4 @@ dex explore semantic [--metric METRICS] [--for-dimension DIMENSIONS]
 
 Every command here also accepts the [global options](/dex/cli/overview#global-options).
 
-Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.18.3/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.
+Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.18.4/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.
