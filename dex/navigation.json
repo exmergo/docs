@@ -108,7 +108,8 @@
             {
               "group": "Project quality",
               "pages": [
-                "dex/reference/evaluation"
+                "dex/reference/evaluation",
+                "dex/reference/incidents"
               ]
             }
           ]

@@ -208,6 +208,14 @@
     "destination": "/dex/reference/host-integration"
   },
   {
+    "source": "/dex/references/incidents",
+    "destination": "/dex/reference/incidents"
+  },
+  {
+    "source": "/dex/references/incidents.md",
+    "destination": "/dex/reference/incidents"
+  },
+  {
     "source": "/dex/references/evaluation",
     "destination": "/dex/reference/evaluation"
   },
