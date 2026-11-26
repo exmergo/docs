@@ -1,0 +1,68 @@
+---
+noindex: true
+title: Dex
+sidebarTitle: Introduction
+description: Explore a warehouse, change dbt models with reviewable plans, and check for drift. Start with a local demo, then bring Dex to your agent and data.
+og:title: Exmergo Dex
+twitter:title: Exmergo Dex
+---
+
+<Note>
+  You are reading the docs for dex v1.18 (v1.18.5). See the [latest version](/dex).
+</Note>
+
+
+
+Dex gives your coding agent a repeatable way to understand a warehouse, change
+its dbt project, and check that the results are right. You keep your existing
+project; Dex adds profiling, reviewable plans, dev builds, and drift checks.
+
+<CardGroup cols={2}>
+  <Card title="Try Dex locally" icon="play" href="/dex/v1.18/quickstart">
+    Map a demo warehouse and investigate its deliberately broken joins and keys.
+    No cloud account or credentials needed.
+  </Card>
+  <Card title="Use Dex with your agent" icon="terminal" href="/dex/v1.18/installation">
+    Install the skills, open your project, and ask your agent to explore or make
+    a change.
+  </Card>
+</CardGroup>
+
+## What do you want to do?
+
+<CardGroup cols={2}>
+  <Card title="Explore a warehouse" href="/dex/v1.18/guides/explore">
+    Understand unfamiliar data with a ranked map, measured keys, and verified joins.
+  </Card>
+  <Card title="Transform a project" href="/dex/v1.18/guides/transform">
+    Review a model change, build on dev, and check the resulting rows.
+  </Card>
+  <Card title="Maintain a project" href="/dex/v1.18/guides/maintain">
+    Find drift against a baseline and review the proposed fixes.
+  </Card>
+  <Card title="Use a semantic layer" href="/dex/v1.18/guides/semantic-layer">
+    Discover metric definitions and choose a path for querying or authoring them.
+  </Card>
+</CardGroup>
+
+## How it fits
+
+Run Dex from your project directory. Your agent drives the commands and reads
+their JSON results. The same commands work directly in a terminal.
+
+Exploration reads your source data. Authoring produces plans for your project
+files; applying a plan writes those files, and a build writes to a dev target.
+Your repository remains the source of truth.
+
+Cost checks and PII handling live in the engine. Before using a warehouse of your
+own, follow [Connect your data](/dex/v1.18/connect) to set the scope and spending limits.
+For the precise boundaries, including the hosted dbt semantic-layer exception,
+read [cost controls](/dex/v1.18/guardrails/cost-controls) and the
+[PII policy](/dex/v1.18/guardrails/pii-policy).
+
+## Find the right level of detail
+
+**Documentation** takes you through setup and common tasks. **Reference** holds
+connector settings, command flags, compatibility rules, and integration contracts.
+If you know the command you need, go straight to the
+[CLI reference](/dex/v1.18/cli/overview).

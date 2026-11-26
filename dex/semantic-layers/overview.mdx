@@ -1424,7 +1424,7 @@ In short:
   the grain suffix (`orders.ordered_at__month`); `--where` is Cube's JSON filter.
   The token is minted from `CUBEJS_API_SECRET` (environment only); a host other
   than loopback needs `DEX_CUBE_ALLOWED_HOSTS`. DuckDB, Postgres, BigQuery,
-  Snowflake and Redshift; needs `[cube]` and `[semantic-api]`. In full:
+  Snowflake, Redshift, ClickHouse and Trino; needs `[cube]` and `[semantic-api]`. In full:
   [Querying: Cube renders, Dex executes](/dex/semantic-layers/cube#querying-cube-renders-dex-executes).
 - **`--api`: Cube executes** over `/v1/load`, on any warehouse Cube supports,
   `execution: vendor`. The PII gate still runs before anything is sent (the
@@ -2040,4 +2040,4 @@ either, so its catalog does the same with a logical table's `description` (#1292
 a derived or annotated table carries its population only as that description's
 last sentence.
 
-Source: [`references/semantic-layer.md`](https://github.com/exmergo/dex/blob/v1.18.5/references/semantic-layer.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/semantic-layer.md)). This page is generated; change the source, not the site.
+Source: [`references/semantic-layer.md`](https://github.com/exmergo/dex/blob/v1.19.0/references/semantic-layer.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/semantic-layer.md)). This page is generated; change the source, not the site.

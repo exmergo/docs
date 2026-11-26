@@ -21,6 +21,8 @@ Choose a command, then expand its usage and options. Every command here also acc
 | [`dex maintain reconcile`](#dex-maintain-reconcile) | propose the edits that reconcile detected drift |
 | [`dex maintain verify`](#dex-maintain-verify) | check the project is correct now, with no baseline |
 | [`dex maintain coverage`](#dex-maintain-coverage) | inventory the tests the dbt project declares |
+| [`dex maintain incidents`](#dex-maintain-incidents) | list the test incidents the run history holds |
+| [`dex maintain diagnose`](#dex-maintain-diagnose) | diagnose each open test incident to a cause |
 
 ## dex maintain snapshot
 
@@ -200,6 +202,54 @@ dex maintain coverage [--full] [--mutate] [--max-models N] [--target TARGET]
 
 </Accordion>
 
+## dex maintain incidents
+
+Fold test outcomes from Elementary's tables and dbt's run results into incidents: open, closed or no longer observed, each with its coverage and retention bound. Reads the newest 20 invocations by default (`--invocations` widens it), priced first on billed connectors; never reads past the source allowlist.
+
+<Accordion title="Usage and options for dex maintain incidents">
+
+```text
+dex maintain incidents [--invocations N] [<object> ...]
+```
+
+**Arguments**
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `[<object> ...]` | model names: repeated, comma-separated or space-separated (default: all) |  |
+
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--invocations N` | read the newest N invocations of Elementary's tables (default 20, at most 2000) |  |
+
+</Accordion>
+
+## dex maintain diagnose
+
+Bisect each open incident over its coverage timeline, bound the break with the committed maintain snapshot series where there is one, and confirm each candidate cause with a check Dex already has. Answers one cause, several, or none, with what was ruled out and the window no recorded state covers; a confirmed cause's repair is handed to transform, never written here.
+
+<Accordion title="Usage and options for dex maintain diagnose">
+
+```text
+dex maintain diagnose [--invocations N] [<object> ...]
+```
+
+**Arguments**
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `[<object> ...]` | model names: repeated, comma-separated or space-separated (default: all) |  |
+
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--invocations N` | read the newest N invocations of Elementary's tables (default 20, at most 2000) |  |
+
+</Accordion>
+
 Every command here also accepts the [global options](/dex/cli/overview#global-options).
 
-Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.18.5/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.
+Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.19.0/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.

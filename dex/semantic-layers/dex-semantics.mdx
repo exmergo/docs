@@ -25,13 +25,13 @@ layer you already use. Three steps:
 3. **Keep the context.** The declaration flows into tests, semantic models and
    the next agent session.
 
-On [ADE-bench](https://github.com/exmergo/dex/blob/v1.18.5/benchmarks/ade_bench/README.md), the same model (Claude Sonnet
+On [ADE-bench](https://github.com/exmergo/dex/blob/v1.19.0/benchmarks/ade_bench/README.md), the same model (Claude Sonnet
 5.5) failed 15 of 75 tasks with Dex and 20 without it: **25% fewer failed
 tasks**, 60 of 75 solved against 55. One scored attempt per task; the
 comparison is the whole guided Dex workflow, not declarations alone.
 
 The field-by-field contract is
-[Declarations: what a model means](https://github.com/exmergo/dex/blob/v1.18.5/skills/transform/references/declarations.md).
+[Declarations: what a model means](https://github.com/exmergo/dex/blob/v1.19.0/skills/transform/references/declarations.md).
 This page is the overview.
 
 ## The imperial accounts
@@ -181,7 +181,7 @@ has a metadata key, and as the last sentence of the description everywhere.
 
 Snowflake Semantic Views and Databricks Metric Views are written as files in
 the repository. Dex deploys nothing to either platform. Which layers Dex can
-also query is in the [semantic layers table](https://github.com/exmergo/dex/blob/v1.18.5/README.md#semantic-layers).
+also query is in the [semantic layers table](https://github.com/exmergo/dex/blob/v1.19.0/README.md#semantic-layers).
 
 ## Adopting it on an existing project
 
@@ -202,13 +202,13 @@ only, so it is free on every connector.
 
 ## Further reading
 
-- [Declarations: what a model means](https://github.com/exmergo/dex/blob/v1.18.5/skills/transform/references/declarations.md):
+- [Declarations: what a model means](https://github.com/exmergo/dex/blob/v1.19.0/skills/transform/references/declarations.md):
   every field, what it renders into, and every check.
 - [Querying the semantic layer](/dex/semantic-layers/overview): the catalog and governed
   queries over the layer a declaration feeds.
 - [The command contract](/dex/reference/command-contract): `transform plan`,
   `transform declare`, `transform build --verify` and `maintain verify` in full.
-- [ADE-bench results](https://github.com/exmergo/dex/blob/v1.18.5/benchmarks/ade_bench/README.md): the run behind the
+- [ADE-bench results](https://github.com/exmergo/dex/blob/v1.19.0/benchmarks/ade_bench/README.md): the run behind the
   25% figure.
 
-Source: [`references/dex-semantics.md`](https://github.com/exmergo/dex/blob/v1.18.5/references/dex-semantics.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/dex-semantics.md)). This page is generated; change the source, not the site.
+Source: [`references/dex-semantics.md`](https://github.com/exmergo/dex/blob/v1.19.0/references/dex-semantics.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/dex-semantics.md)). This page is generated; change the source, not the site.
