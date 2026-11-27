@@ -108,6 +108,7 @@
             {
               "group": "Project quality",
               "pages": [
+                "dex/reference/dex-telemetry",
                 "dex/reference/evaluation",
                 "dex/reference/incidents"
               ]

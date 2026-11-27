@@ -54,7 +54,7 @@ Propose the change as a diff that keeps every comment, and write it with `--conf
 <Accordion title="Usage and options for dex config set">
 
 ```text
-dex config set [<key value> ...]
+dex config set [--comment COMMENT] [<key value> ...]
 ```
 
 **Arguments**
@@ -62,6 +62,12 @@ dex config set [<key value> ...]
 | Argument | Description | Default |
 | --- | --- | --- |
 | `[<key value> ...]` | one or more key and YAML value pairs, applied as one change |  |
+
+**Options**
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--comment COMMENT` | a reason written into the file beside the value (one pair only) |  |
 
 </Accordion>
 
@@ -91,4 +97,4 @@ dex config unset [--duplicate] [<key> ...]
 
 Every command here also accepts the [global options](/dex/cli/overview#global-options).
 
-Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.19.0/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.
+Source: [`packages/dex-core/src/exmergo_dex_core/cli.py`](https://github.com/exmergo/dex/blob/v1.19.1/packages/dex-core/src/exmergo_dex_core/cli.py) ([edit on main](https://github.com/exmergo/dex/edit/main/packages/dex-core/src/exmergo_dex_core/cli.py)). This page is generated; change the source, not the site.

@@ -158,7 +158,13 @@ dex config set <key> <value>      -> an in-place edit that keeps every comment, 
                                      is repaired one key at a time. Refuses a
                                      credential-like name in the key or inside the
                                      value. data.changes is one row per value (key,
-                                     before, after, or withheld)
+                                     before, after, or withheld). --comment "<text>"
+                                     (one pair only) writes # lines saying why the
+                                     value is there: above the first item a list gains
+                                     (a one-line flow list becomes a block list), else
+                                     above the key; a list the value extends keeps
+                                     every line it had, its comments included. A
+                                     comment reading as a credential is refused (#1473)
 dex config unset <key> [<key>...] -> removes settings with the same in-place edit and
                                      handshake as set. Takes a key dex does not read and
                                      a whole block; a block left empty goes too, with
@@ -316,6 +322,35 @@ dex init [<name>]                -> complete project setup: new dbt-backed Dex p
                                      `dex transform deps` and, as the user's to run,
                                      `dbt deps` and `dbt run --select elementary --target
                                      <dbt_prod_target>` on production (#1464).
+                                     Where the package is present or offered,
+                                     data.elementary.allowlist says whether the committed
+                                     source allowlist reaches the schema it writes in
+                                     production (#1473): `not_applicable` (no allowlist,
+                                     DuckDB), `reached` (`unrestricted` when empty),
+                                     `proposed` (namespace, source `prod` or `profile`,
+                                     and the `dex config set ... --comment` that adds
+                                     it, never written by init; checked first by
+                                     opening a connection with that entry alone, and
+                                     `exists: null` where that could not be asked),
+                                     `not_created` or `unreadable` (the connection
+                                     cannot open it yet, so no command is proposed: an
+                                     entry naming a schema that does not exist makes
+                                     every command refuse the allowlist; rerun init
+                                     after the package's first production run), or
+                                     `unresolved`
+                                     (reason_code `prod_unset`, `prod_target_unset`,
+                                     `custom_schema_naming`, `templated_config`,
+                                     `nested_schema_config`, with the command that
+                                     settles it or a template to fill in). The schema is
+                                     dbt's naming of the package's +schema for
+                                     production (<prod>_<custom>, or <custom>_<prod
+                                     target> under the layered override), production
+                                     read from <connector>.prod else the profile output
+                                     dbt_prod_target names, never the dev namespace.
+                                     `proposed` and `unresolved` add a missing input
+                                     (source_allowlist, elementary_schema) with
+                                     blocking: false: a non-blocking input leaves init
+                                     ok, and only blocking inputs make it an error.
 dex transform init "<name>"       -> legacy bootstrap of a dbt project skeleton; requires an explicit
                                      --connector (never defaults); refuses if a project exists;
                                      --layered-schemas routes staging/intermediate/marts to their
@@ -824,8 +859,12 @@ dex maintain verify [<models>]    -> is the project correct right now, no .dex/s
                                      freshness_exceeded (a time column's declared freshness: its
                                      newest value trails the warehouse's clock by more than max_lag,
                                      or it holds no value; lag in seconds, never a value, one
-                                     data.freshness record per declared column; high on a capture
-                                     basis, medium on business; #1460),
+                                     data.freshness record per declared check, check: max_lag or
+                                     deadline; high on a capture basis, medium on business; #1460),
+                                     deadline_missed (a declared freshness.deadline passed today, in
+                                     its timezone and on a day its days include, with no value from
+                                     today in the column; counts only; not_applicable before the
+                                     deadline or on an unscheduled day; #1486),
                                      population_delta (a built model declaring no parent, against the
                                      parent dex drafts for it: orphan_keys, missing_parents, empty_rows,
                                      one data.population_delta record per model, needs_decision listed
@@ -922,7 +961,9 @@ dex maintain incidents [<models>] [--invocations N]
                                      the package is installed, enabled and uploading, then dbt's
                                      run_results.json. data.sources names each, read, missing or
                                      refused with a reason_code, and an empty data.incidents means no
-                                     failure only where a source reads read. Elementary's read is a run
+                                     failure only where a source reads read. Elementary's tables are
+                                     read at package releases 0.16.4 and 0.26.1 (any other is
+                                     elementary_release_untested). Elementary's read is a run
                                      count, never a number of days: the newest N dbt_invocations rows
                                      (20 by default, 2000 at most), through the query firewall, and
                                      its five statements (plus a first read's profiles) are priced as
@@ -953,9 +994,19 @@ dex maintain diagnose [<models>] [--invocations N]
                                      key twice, with the grain axis on each source the tested model
                                      reads: key_lost_uniqueness against a bounding snapshot that
                                      proved the key unique, else the declared-claim check
-                                     (declared_grain_not_unique). The project is ruled out where the
-                                     failing commit passed earlier; seed, package and schedule are
-                                     not_checked. verdict is cause, several or no_cause; no_cause
+                                     (declared_grain_not_unique). The other owners are answered over
+                                     the failing test's lineage at the runs that bound the break
+                                     (#1476): source_retyped (the schema axis's column_retyped between
+                                     the bounding snapshot and the later one or the live catalog),
+                                     project_change (files the commit range touched that the lineage
+                                     is built from, then maintain verify on the changed models),
+                                     package_upgraded (package-lock.yml's pins at the two commits),
+                                     seed_edited (the seed file's git hash at the two commits) and
+                                     built_before_parent (a parent model built after its child at the
+                                     failing run and before it at the last pass, from Elementary's
+                                     dbt_run_results, priced with the checks). Each range file has one
+                                     owner; same_commit rules project, seed and package out.
+                                     verdict is cause, several or no_cause; no_cause
                                      answers with ruled_out and unseen and never names the likeliest
                                      candidate. A confirmed cause's repair is handed to transform
                                      under next_steps, never written. Beside the cause,
@@ -1089,7 +1140,7 @@ each selected model does not yet declare, lays the supplied `declarations` over
 them field by field, and stores the lot as one capped plan, naming every model it
 skipped and why. The full shape, the refusals and
 what each field renders into:
-[`skills/transform/references/declarations.md`](https://github.com/exmergo/dex/blob/v1.19.0/skills/transform/references/declarations.md).
+[`skills/transform/references/declarations.md`](https://github.com/exmergo/dex/blob/v1.19.1/skills/transform/references/declarations.md).
 
 `kind` is one of `model_sql`, `schema_yml`, `semantic_yml` (optional on
 `semantic define|update`, which imply `semantic_yml`), `packages_yml`,
@@ -1617,7 +1668,8 @@ default, or a filter or operator after it is refused. A key naming a location
   zone read as UTC, so a value exactly at the limit passes; a column that is no
   date or timestamp errors the test and is `unchecked` (`not_temporal`) in
   `maintain verify`. A listed `dex_freshness` whose claim the column's declared
-  freshness no longer gives (its `max_lag` changed) is reported `stale`,
+  freshness no longer gives (its `max_lag` changed, or was dropped for a
+  `deadline`, which renders no `dex_freshness`) is reported `stale`,
   `reason: freshness_changed`, with a warning, and is never removed; a change
   of `basis` alone keeps the listed test, which behaves the same. It renders
   `dex_continuity` (#1461) under each column declaring `continuity` (the column
@@ -1701,7 +1753,42 @@ default, or a filter or operator after it is refused. A key naming a location
   where the column no longer qualifies, and one whose column the cache no
   longer counts stays `already_listed`. A hand-written `dimension_anomalies`
   on the same one column is `hand_written`; one grouping by several columns
-  is another monitor. Nothing is
+  is another monitor. A column declared `unit: fraction` or `unit: percent`
+  (#1485), and a column declared role `measure` with an `additivity` (#1591),
+  becomes an `elementary.column_anomalies` listed under that column, with the
+  model's one time column as `timestamp_column` (none or several withhold it
+  as they withhold `volume_anomalies`) and an explicit `column_anomalies`
+  list: `[min, max]` from the unit; `[zero_count, average, sum]` from
+  `additive`, `[min, max, average]` from `semi_additive` and `[average]` from
+  `non_additive`, so `sum` is never written on a measure that does not add.
+  A column both rows reach gets one test whose list is the union in the
+  package's monitor order (`COLUMN_MONITOR_ORDER`). Its marker carries
+  `sources` (each declaration field with the monitors it gave), its row
+  carries the same as `sources[]` and the column as `column`, and its
+  decision names the column in `decision` and `chosen` (`column_name`,
+  `column_anomalies`), the first field as `field` and every field as
+  `fields` where there are several. A measure with no additivity, an
+  additivity on a column that is not a measure, any other unit, a column not
+  output (`column_not_output`), and a column flagged as personal data by the
+  YAML, the cached profile or an unprofiled name (`pii_flagged`) give none. A
+  hand-written `column_anomalies` under the same column with the same
+  `timestamp_column` is `hand_written`, whatever its list; a Dex-written one
+  is stale with `changed: column` and a `cause` where the column no longer
+  gives one, or `changed: column_anomalies` with the current `monitors` and a
+  `replacement` where the list moved. A time column whose `freshness` declares
+  a `deadline` (`HH:MM`, with a required IANA `timezone` and optional `days`,
+  #1486) gives an `elementary.data_freshness_sla` on the model with that
+  `timestamp_column`, `sla_time`, `timezone` and, from `days`, `day_of_week`
+  as Elementary's full day names; a `max_lag` is never read as a deadline and
+  alone gives none. It is `release_unsupported` below Elementary 0.23.1, which
+  first ships the test, and `sla_filter_quote` where a population filter value
+  holds a quote on BigQuery, Snowflake, Databricks or Redshift (the package
+  repeats the `where_expression` inside a message literal, and its re-escaping
+  breaks the `\'` those connectors take); a hand-written one on the same `timestamp_column` is
+  `hand_written` whatever deadline it states, and a Dex-written one is stale
+  with `changed: deadline` where the deadline moved or was removed. On a
+  `business` basis column the plan writes it and warns: the test needs a value
+  from today, which a load of the previous day's events never holds. Nothing is
   written unless the package is installed (or the plan adds it) and the
   repository's `dbt_project.yml` enables `models: elementary` on the production
   target, read with `target.name` replaced by `dbt_prod_target`: a literal, an
@@ -2240,7 +2327,8 @@ default, or a filter or operator after it is refused. A key naming a location
   declared `history` to the snapshot's versions (`temporal_*`, #1027, one record
   per contract under `data.verification.temporal_contracts`), and a time
   column's declared `freshness` to the warehouse's clock (`freshness_exceeded`,
-  #1460, one record per declared column under `data.verification.freshness`). A
+  #1460, and a declared daily `deadline`, `deadline_missed`, #1486, one record
+  per declared check under `data.verification.freshness`). A
   built model that
   declares no parent is measured against the parent dex drafts for it (#1228):
   orphan keys, missing parents and rows whose child columns are all NULL or zero
@@ -3298,4 +3386,4 @@ Because every skill, test, and benchmark depends on it, the contract was locked
 before the engine logic was built, and the subcommands fill in against this
 fixed boundary. Exploration, authoring, and maintenance are live today.
 
-Source: [`references/command-contract.md`](https://github.com/exmergo/dex/blob/v1.19.0/references/command-contract.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/command-contract.md)). This page is generated; change the source, not the site.
+Source: [`references/command-contract.md`](https://github.com/exmergo/dex/blob/v1.19.1/references/command-contract.md) ([edit on main](https://github.com/exmergo/dex/edit/main/references/command-contract.md)). This page is generated; change the source, not the site.

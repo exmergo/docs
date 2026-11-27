@@ -208,6 +208,14 @@
     "destination": "/dex/reference/host-integration"
   },
   {
+    "source": "/dex/references/dex-telemetry",
+    "destination": "/dex/reference/dex-telemetry"
+  },
+  {
+    "source": "/dex/references/dex-telemetry.md",
+    "destination": "/dex/reference/dex-telemetry"
+  },
+  {
     "source": "/dex/references/incidents",
     "destination": "/dex/reference/incidents"
   },
